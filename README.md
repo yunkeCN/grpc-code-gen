@@ -47,7 +47,7 @@ base.gen({
 
 ## Params
 
-参数 | 类型 | 意义
+参数 | 类型 | 说明
 ---|---|---
 gitUrls | string[] | 仓库地址数组
 branch |  string | 分支
