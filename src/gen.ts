@@ -12,6 +12,7 @@ program
   .option('-b, --branch [branch]', 'Branch of proto')
   .option('-t, --token [token]', 'Access token for this repository')
   .option('-d, --dir [dir]', 'Base dir of the code gen')
+  .option('-t, --target [target]', 'Target file type, ex: javascript, typescript', 'typescript')
   .option('-c, --config [config]', 'Config file path', configFile)
   .option('-u, --url <items>', 'Urls of git repository, split by \',\'', function list(val) {
     return val.split(',');

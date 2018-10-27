@@ -162,10 +162,13 @@ export type Options = {
   branch: string;
   accessToken: string;
   baseDir?: string;
+  target?: 'javascript' | 'typescript'
 };
 
 export async function gen(opt: Options): Promise<string> {
-  const { baseDir = BASE_DIR } = opt;
+  const { baseDir = BASE_DIR, target = 'typescript' } = opt;
+
+  const typescript = target === 'typescript';
 
   fs.mkdirpSync(baseDir);
 
@@ -178,14 +181,27 @@ export async function gen(opt: Options): Promise<string> {
   const jsonPath = getAbsPath('root.json', baseDir);
   await fs.writeJSON(jsonPath, json);
 
-  const grpcObjPath = getAbsPath('grpcObj.js', baseDir);
-  await fs.writeFile(grpcObjPath, [
-    `const grpc = require('grpc');`,
-    `const { loadFromJson } = require('@yunke/load-proto');`,
-    `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
-    `const grpcObject = grpc.loadPackageDefinition(loadFromJson(root));`,
-    `module.exports = grpcObject;`,
-  ].join('\n'));
+  const moduleSuffix = typescript ? 'ts' : 'js';
+
+  const grpcObjPath = getAbsPath(`grpcObj.${moduleSuffix}`, baseDir);
+  if (typescript) {
+    await fs.writeFile(grpcObjPath, [
+      `import * as grpc from 'grpc';`,
+      `import { loadFromJson } from '@yunke/load-proto';\n`,
+      `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
+      `const grpcObject = grpc.loadPackageDefinition(loadFromJson(root));`,
+      `export default grpcObject;`,
+    ].join('\n'));
+  } else {
+    await fs.writeFile(grpcObjPath, [
+      `const grpc = require('grpc');`,
+      `const { loadFromJson } = require('@yunke/load-proto');`,
+      `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
+      `const grpcObject = grpc.loadPackageDefinition(loadFromJson(root));`,
+      `module.exports = grpcObject;`,
+      `module.exports.default = grpcObject;`,
+    ].join('\n'));
+  }
 
   const result = inspectNamespace(root);
 
@@ -234,18 +250,11 @@ export async function gen(opt: Options): Promise<string> {
   });
   services.map(async (service) => {
     const packageName = getPackageName(service.fullName).replace(/\./g, '/');
-    const servicePath = getAbsPath(`${service.fullName.replace(/\./g, '/')}.js`, baseDir);
+    const servicePath = getAbsPath(`${service.fullName.replace(/\./g, '/')}.${moduleSuffix}`, baseDir);
     const serviceDTsPath = getAbsPath(`${service.fullName.replace(/\./g, '/')}.d.ts`, baseDir);
 
     await fs.mkdirp(getAbsPath(packageName, baseDir));
-    await fs.writeFile(servicePath, [
-      `const { get } = require('lodash')`,
-      `const grpcObject = require('${getImportPath(servicePath, grpcObjPath)}');\n`,
-      `const ${service.name} = get(grpcObject, '${service.fullName}');`,
-      `module.exports.${service.name} = ${service.name};\n`,
-      `module.exports.default = ${service.name};\n`,
-    ].join('\n'));
-    // d.ts
+
     const serviceWithMethod = servicesWithMethods[service.fullName];
     const config = {
       messageMap,
@@ -256,15 +265,42 @@ export async function gen(opt: Options): Promise<string> {
       const responseType = 'types.' + getTsType(method.responseType, packageName, config).tsType;
       return `  ${method.name}(request: ${requestType}, callback: (error: Error, response: ${responseType}) => void): void;`
     });
-    await fs.writeFile(serviceDTsPath, [
-      `import { ChannelCredentials } from "grpc";`,
-      `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
-      `export declare class ${service.name} {`,
-      `  constructor(address: string, credentials: ChannelCredentials, options?: object)`,
-      ...methodStrArr,
-      `}`,
-      `export default ${service.name};\n`,
-    ].join('\n'));
+
+    if (typescript) {
+      const typeName = 'I' + service.name;
+      await fs.writeFile(servicePath, [
+        `import { get } from 'lodash';`,
+        `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,
+        `import { ChannelCredentials } from "grpc";`,
+        `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
+        `interface ${typeName} {`,
+        `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};`,
+        ...methodStrArr,
+        `}`,
+        `export const ${service.name}: ${typeName} = get<any, string>(grpcObject, '${service.fullName}');`,
+        `export default ${service.name};\n`,
+      ].join('\n'));
+    } else {
+      await fs.writeFile(servicePath, [
+        `const { get } = require('lodash');`,
+        `const grpcObject = require('${getImportPath(servicePath, grpcObjPath)}');\n`,
+        `const ${service.name} = get(grpcObject, '${service.fullName}');`,
+        `module.exports.${service.name} = ${service.name};\n`,
+        `module.exports.default = ${service.name};\n`,
+      ].join('\n'));
+
+      // .d.ts
+      await fs.writeFile(serviceDTsPath, [
+        `import { ChannelCredentials } from "grpc";`,
+        `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
+        `class ${service.name} {`,
+        `  constructor(address: string, credentials: ChannelCredentials, options?: object)`,
+        ...methodStrArr,
+        `}`,
+        `export ${service.name};`,
+        `export default ${service.name};\n`,
+      ].join('\n'));
+    }
   });
   return baseDir;
 }

@@ -7,7 +7,7 @@ base.gen({
   ],
   branch: 'test',
   accessToken: 'b1wZx77sDx1YQPLyLww3',
-  baseDir: `${__dirname}/code-gen`
+  baseDir: `${__dirname}/code-gen`,
 })
   .catch((err)=>{
     console.error(err.stack)
