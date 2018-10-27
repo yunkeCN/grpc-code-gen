@@ -1,5 +1,6 @@
 import * as program from 'commander';
 import * as fs from 'fs';
+import { assign } from 'lodash';
 import * as path from 'path';
 import * as base from "./base";
 import { Options } from "./base";
@@ -29,7 +30,7 @@ if (fs.existsSync(configFile)) {
   Object.assign(opt, require(configFile));
 }
 
-Object.assign(opt, {
+assign(opt, {
   gitUrls: url,
   branch: branch,
   accessToken: token,
