@@ -53,4 +53,4 @@ gitUrls | string[] | 仓库地址数组
 branch |  string | 分支
 accessToken | string | git access token
 baseDir? | string | 生成目录
-target? | `javascript \| typescript` | 目标语言 
+target? | `javascript typescript` | 目标语言 
