@@ -157,12 +157,14 @@ function getImportPath(fromPath: string, toPath: string) {
   return relative;
 }
 
-export async function gen(opt: {
+export type Options = {
   gitUrls: string[];
   branch: string;
   accessToken: string;
   baseDir?: string;
-}): Promise<string> {
+};
+
+export async function gen(opt: Options): Promise<string> {
   const { baseDir = BASE_DIR } = opt;
 
   fs.mkdirpSync(baseDir);

@@ -1,7 +1,8 @@
 import * as program from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as base from './base';
+import * as base from "./base";
+import { Options } from "./base";
 
 const packageJson = require('../package.json');
 program
@@ -21,19 +22,21 @@ const {
   dir,
 } = program;
 
-const opt = {
-  gitUrls: url,
-  branch: branch,
-  accessToken: token,
-  baseDir: dir,
-};
+const opt = {};
 
 const configFile = path.join(process.cwd(), 'grpc-code-gen.config.js');
 if (fs.existsSync(configFile)) {
   Object.assign(opt, require(configFile));
 }
 
-base.gen(opt)
+Object.assign(opt, {
+  gitUrls: url,
+  branch: branch,
+  accessToken: token,
+  baseDir: dir,
+});
+
+base.gen(opt as Options)
   .then((dir: string) => {
     console.info(`Generate success in ${dir}`);
   })
