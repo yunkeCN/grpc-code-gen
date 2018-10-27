@@ -26,7 +26,7 @@ grpc-code-gen gen
 ```
 
 
-## program usage
+## Program usage
 ```js
 const base = require('@yunke/grpc-code-gen/build/base');
 
