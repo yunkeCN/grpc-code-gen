@@ -273,7 +273,7 @@ export async function gen(opt: Options): Promise<string> {
         `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,
         `import { ChannelCredentials } from "grpc";`,
         `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
-        `interface ${typeName} {`,
+        `export interface ${typeName} {`,
         `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};`,
         ...methodStrArr,
         `}`,
