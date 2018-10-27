@@ -1,0 +1,37 @@
+{
+  "name": "@yunke/grpc-code-gen",
+  "version": "0.1.0",
+  "license": "MIT",
+  "bin": {
+    "grpc-code-gen": "./bin/index.js"
+  },
+  "scripts": {
+    "build": "npm run clean && npm run compile",
+    "clean": "gts clean",
+    "compile": "tsc -p .",
+    "prepublish": "npm run build",
+    "dev": "tsc --watch",
+    "test-gen": "TS_NODE_PROJECT=test/tsconfig.test.json node -r ts-node/register test/gen.ts",
+    "test-gen-cli": "TS_NODE_PROJECT=test/tsconfig.test.json node -r ts-node/register test/gen-cli.ts",
+    "test": "TS_NODE_PROJECT=test/tsconfig.test.json node -r ts-node/register test/test.ts"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^0.3.2",
+    "@yunke/load-proto": "^1.2.2",
+    "commander": "^2.19.0",
+    "cross-spawn": "^6.0.5",
+    "fs-extra": "^7.0.0",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "@types/cross-spawn": "^6.0.0",
+    "@types/fs-extra": "^5.0.4",
+    "@types/lodash": "^4.14.116",
+    "@types/protobufjs": "^6.0.0",
+    "grpc": "^1.15.1",
+    "gts": "^0.8.0",
+    "ts-node": "^7.0.1",
+    "tsconfig-paths": "^3.6.0",
+    "typescript": "^3.1.1"
+  }
+}
