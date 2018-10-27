@@ -4,6 +4,6 @@ module.exports = {
     'git@git.myscrm.cn:2c/panther-third-proto.git',
   ],
   branch: 'test',
-  accessToken: '${token}',
-  baseDir: `${__dirname}/code-gen`,
+  accessToken: 'b1wZx77sDx1YQPLyLww3',
+  baseDir: `${__dirname}/code-gen-cli`,
 };

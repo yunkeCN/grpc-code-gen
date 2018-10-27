@@ -1,6 +1,5 @@
 import * as program from 'commander';
 import * as fs from 'fs';
-import { assign } from 'lodash';
 import * as path from 'path';
 import * as base from "./base";
 import { Options } from "./base";
@@ -30,7 +29,11 @@ const {
 const opt: any = {};
 
 if (fs.existsSync(config)) {
-  Object.assign(opt, require(config));
+  if (/^\//.test(config)) {
+    Object.assign(opt, require(config));
+  } else {
+    Object.assign(opt, require(path.join(process.cwd(), config)));
+  }
 }
 
 if (url) {
