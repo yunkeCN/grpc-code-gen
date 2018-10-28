@@ -8,6 +8,7 @@ base.gen({
   branch: 'test',
   accessToken: 'b1wZx77sDx1YQPLyLww3',
   baseDir: `${__dirname}/code-gen`,
+  // target: 'javascript',
 })
   .catch((err)=>{
     console.error(err.stack)

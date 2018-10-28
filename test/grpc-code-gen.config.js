@@ -6,4 +6,5 @@ module.exports = {
   branch: 'test',
   accessToken: 'b1wZx77sDx1YQPLyLww3',
   baseDir: `${__dirname}/code-gen-cli`,
+  // target: 'javascript',
 };

@@ -263,7 +263,7 @@ export async function gen(opt: Options): Promise<string> {
     const methodStrArr = serviceWithMethod.methods.map((method) => {
       const requestType = 'types.' + getTsType(method.requestType, packageName, config).tsType;
       const responseType = 'types.' + getTsType(method.responseType, packageName, config).tsType;
-      return `  ${method.name}(request: ${requestType}, callback: (error: Error, response: ${responseType}) => void): void;`
+      return `  ${method.name}(request: ${requestType}): Promise<${responseType}>;`
     });
 
     if (typescript) {
@@ -272,19 +272,34 @@ export async function gen(opt: Options): Promise<string> {
         `import { get } from 'lodash';`,
         `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,
         `import { ChannelCredentials } from "grpc";`,
+        `import { promisify } from 'util';`,
         `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
         `export interface ${typeName} {`,
         `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};`,
         ...methodStrArr,
         `}`,
-        `export const ${service.name}: ${typeName} = get<any, string>(grpcObject, '${service.fullName}');`,
+        `const Service: ${typeName} = get<any, string>(grpcObject, '${service.fullName}');`,
+        `
+Object.keys(Service.prototype).forEach((key) => {
+  if (!/^\\$/.test(key)) {
+    Service.prototype[key] = promisify(Service.prototype[key]);
+  }
+});`,
+        `export const ${service.name}: ${typeName} = Service;`,
         `export default ${service.name};\n`,
       ].join('\n'));
     } else {
       await fs.writeFile(servicePath, [
         `const { get } = require('lodash');`,
+        `const { promisify } = require('util');`,
         `const grpcObject = require('${getImportPath(servicePath, grpcObjPath)}');\n`,
         `const ${service.name} = get(grpcObject, '${service.fullName}');`,
+        `
+Object.keys(${service.name}.prototype).forEach((key) => {
+  if (!/^\\$/.test(key)) {
+    ${service.name}.prototype[key] = promisify(${service.name}.prototype[key]);
+  }
+});`,
         `module.exports.${service.name} = ${service.name};\n`,
         `module.exports.default = ${service.name};\n`,
       ].join('\n'));
@@ -293,11 +308,10 @@ export async function gen(opt: Options): Promise<string> {
       await fs.writeFile(serviceDTsPath, [
         `import { ChannelCredentials } from "grpc";`,
         `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
-        `class ${service.name} {`,
+        `export class ${service.name} {`,
         `  constructor(address: string, credentials: ChannelCredentials, options?: object)`,
         ...methodStrArr,
         `}`,
-        `export ${service.name};`,
         `export default ${service.name};\n`,
       ].join('\n'));
     }
