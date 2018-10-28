@@ -275,10 +275,12 @@ export async function gen(opt: Options): Promise<string> {
         `import { promisify } from 'util';`,
         `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
         `export interface ${typeName} {`,
+        `  $FILE_NAME: string;`,
         `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};`,
         ...methodStrArr,
         `}`,
         `const Service: ${typeName} = get<any, string>(grpcObject, '${service.fullName}');`,
+        `Service.$FILE_NAME = '${service.filename}';`,
         `
 Object.keys(Service.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
@@ -294,6 +296,7 @@ Object.keys(Service.prototype).forEach((key) => {
         `const { promisify } = require('util');`,
         `const grpcObject = require('${getImportPath(servicePath, grpcObjPath)}');\n`,
         `const ${service.name} = get(grpcObject, '${service.fullName}');`,
+        `${service.name}.$FILE_NAME = '${service.filename}';`,
         `
 Object.keys(${service.name}.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
@@ -309,6 +312,7 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         `import { ChannelCredentials } from "grpc";`,
         `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
         `export class ${service.name} {`,
+        `  static $FILE_NAME: string;`,
         `  constructor(address: string, credentials: ChannelCredentials, options?: object)`,
         ...methodStrArr,
         `}`,

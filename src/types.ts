@@ -30,17 +30,19 @@ export interface TField {
 
 export interface TMessage extends TBase {
   fields: TField[];
+
+  filename: string;
 }
 
 export interface TEnum extends TBase {
   values: { [key: string]: any };
 
   comments: { [key: string]: string };
+
+  filename: string;
 }
 
 export interface TMethod extends TBase {
-  filename?: string;
-
   options?: any;
 
   requestStream?: boolean;
@@ -57,11 +59,11 @@ export interface TMethod extends TBase {
 }
 
 export interface TService extends TBase {
-  filename?: string;
-
   options?: any;
 
   methods?: TMethod[];
 
   author: string;
+
+  filename: string;
 }
