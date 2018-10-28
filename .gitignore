@@ -4,6 +4,7 @@ build
 .idea
 .load-git-cache
 .load-proto-cache
+.grpc-code-gen
 build
 test/code-gen
 test/code-gen-cli

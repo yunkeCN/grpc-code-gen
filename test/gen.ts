@@ -10,6 +10,6 @@ base.gen({
   baseDir: `${__dirname}/code-gen`,
   target: 'javascript',
 })
-  .catch((err)=>{
+  .catch((err) => {
     console.error(err.stack)
   });

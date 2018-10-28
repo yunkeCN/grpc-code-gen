@@ -178,7 +178,7 @@ export async function gen(opt: Options): Promise<string> {
 
   const json = root.toJSON({ keepComments: true });
 
-  const jsonPath = getAbsPath('root.json', baseDir);
+  const jsonPath = path.join(process.cwd(), '.grpc-code-gen', 'root.json');
   await fs.writeJSON(jsonPath, json);
 
   const moduleSuffix = typescript ? 'ts' : 'js';

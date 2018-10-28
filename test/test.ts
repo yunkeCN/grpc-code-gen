@@ -4,8 +4,6 @@ import ImTencentYunService from './code-gen/im/ImTencentYunService';
 
 const customerFeedService = new CustomerFeedService('api.myscrm.cn:10056', grpc.credentials.createInsecure());
 
-console.info(CustomerFeedService.$FILE_NAME)
-
 customerFeedService.GetRadarFeedHotPull({
   'yk_org_code': '',
   'yk_project_id': '',
