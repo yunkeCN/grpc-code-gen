@@ -1,4 +1,5 @@
 !build
 .load-git-cache
 .load-proto-cache
+.grpc-code-gen
 test
