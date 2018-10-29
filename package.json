@@ -1,6 +1,6 @@
 {
   "name": "@yunke/grpc-code-gen",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "license": "MIT",
   "bin": {
     "grpc-code-gen": "./bin/index.js"
