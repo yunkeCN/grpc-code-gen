@@ -25,6 +25,16 @@ then
 grpc-code-gen gen
 ```
 
+### Params
+
+参数 | 类型 | 说明
+---|---|---
+gitUrls | string[] | 仓库地址数组
+branch |  string | 分支
+accessToken | string | git access token
+baseDir? | string | 生成目录
+target? | `javascript typescript` | 目标语言
+
 
 ## Program usage
 ```js
@@ -43,14 +53,4 @@ base.gen({
     console.error(err.stack)
   });
 ```
-
-
-## Params
-
-参数 | 类型 | 说明
----|---|---
-gitUrls | string[] | 仓库地址数组
-branch |  string | 分支
-accessToken | string | git access token
-baseDir? | string | 生成目录
-target? | `javascript typescript` | 目标语言 
+ 
