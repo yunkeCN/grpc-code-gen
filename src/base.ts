@@ -152,7 +152,9 @@ function genTsType(namespace: TNamespace, config: {
 
 function getImportPath(fromPath: string, toPath: string) {
   let relative = path.relative(path.dirname(fromPath), toPath);
-  relative = relative.replace(/\.(js|d\.ts|ts)$/, '');
+  relative = relative
+    .replace(/\.(js|d\.ts|ts)$/, '')
+    .replace(/\\/g, '/');
   if (!/^\./.test(relative)) {
     relative = `./${relative}`;
   }
