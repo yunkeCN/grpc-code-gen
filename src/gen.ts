@@ -30,7 +30,7 @@ const {
 const opt: any = {};
 
 if (fs.existsSync(config)) {
-  if (/^\//.test(config)) {
+  if (path.isAbsolute(config)) {
     Object.assign(opt, require(config));
   } else {
     Object.assign(opt, require(path.join(process.cwd(), config)));
