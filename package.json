@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^0.3.2",
-    "@yunke/load-proto": "^1.2.3",
+    "@yunke/load-proto": "^1.2.4",
     "commander": "^2.19.0",
     "cross-spawn": "^6.0.5",
     "fs-extra": "^7.0.0",

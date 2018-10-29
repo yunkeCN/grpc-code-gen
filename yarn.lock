@@ -86,10 +86,11 @@
   dependencies:
     protobufjs "*"
 
-"@yunke/load-git@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry-npm.myscrm.cn/repository/yunke/@yunke/load-git/-/load-git-1.1.1.tgz#7bc073e1d51715edeac59c83825550896e5dfd7e"
+"@yunke/load-git@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry-npm.myscrm.cn/repository/yunke/@yunke/load-git/-/load-git-1.2.0.tgz#602e8ab6cb88a06a16b70f606a4129f35561fc58"
   dependencies:
+    fs-extra "^7.0.0"
     mkdirp "^0.5.1"
     request "^2.88.0"
     request-promise-native "^1.0.5"
@@ -98,11 +99,11 @@
     url "^0.11.0"
     uuid "^3.3.2"
 
-"@yunke/load-proto@^1.2.3":
-  version "1.2.3"
-  resolved "https://registry-npm.myscrm.cn/repository/yunke/@yunke/load-proto/-/load-proto-1.2.3.tgz#9c0400b7e26febe18d5a4915a9db9d2862ac4b50"
+"@yunke/load-proto@^1.2.4":
+  version "1.2.4"
+  resolved "https://registry-npm.myscrm.cn/repository/yunke/@yunke/load-proto/-/load-proto-1.2.4.tgz#01b092923e1ca4f6e29940a13e9358115c7a3a8b"
   dependencies:
-    "@yunke/load-git" "^1.1.1"
+    "@yunke/load-git" "^1.2.0"
     fs-extra "^7.0.0"
     glob "^7.1.3"
     lodash "^4.17.11"
