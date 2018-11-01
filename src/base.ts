@@ -2,6 +2,7 @@ import { loadProto } from '@yunke/load-proto';
 import * as fs from 'fs-extra';
 import { get, set } from 'lodash';
 import * as path from 'path';
+import { Root } from 'protobufjs';
 import { inspectNamespace } from "./pbjs";
 import { TEnum, TMessage, TMethod, TService } from "./types";
 
@@ -50,18 +51,19 @@ const TYPE_MAP: { [key: string]: string } = {
   'bytes': 'string',
 };
 
-function walkPackagePath(packagePath: string, map: { [key: string]: any }): string | null {
-  if (map[packagePath]) {
-    return packagePath;
+function walkPackagePath(packagePath: string, type: string, map: { [key: string]: any }): string | null {
+  if (map[`${packagePath}.${type}`]) {
+    return `${packagePath}.${type}`;
   }
   const split = packagePath.split('.');
   if (split.length === 1) {
     return null;
   }
-  return walkPackagePath(split.slice(0, split.length - 1).join('.'), map);
+  return walkPackagePath(split.slice(0, split.length - 1).join('.'), type, map);
 }
 
 function getTsType(protoType: string, fullName: string, config: {
+  root: Root,
   messageMap: { [key: string]: TMessage },
   enumMap: { [key: string]: TEnum },
 }): { tsType: string, basic: boolean } {
@@ -80,12 +82,17 @@ function getTsType(protoType: string, fullName: string, config: {
     };
   }
 
-  const { messageMap, enumMap } = config;
+  const { messageMap, enumMap, root } = config;
 
-  const packagePath = `${fullName}.${protoType}`;
+  let tsType = walkPackagePath(fullName, protoType, messageMap) ||
+    walkPackagePath(fullName, protoType, enumMap);
 
-  const tsType = walkPackagePath(packagePath, messageMap) ||
-    walkPackagePath(packagePath, enumMap);
+  if (!tsType) {
+    const typeOrEnum = root.lookupTypeOrEnum(protoType);
+    if (typeOrEnum) {
+      tsType = typeOrEnum.fullName.replace(/^\./, '');
+    }
+  }
 
   if (tsType) {
     return {
@@ -97,6 +104,7 @@ function getTsType(protoType: string, fullName: string, config: {
 }
 
 function genTsType(namespace: TNamespace, config: {
+  root: Root,
   messageMap: { [key: string]: TMessage },
   enumMap: { [key: string]: TEnum },
 }, deep: number = 0): string {
@@ -241,7 +249,7 @@ export async function gen(opt: Options): Promise<string> {
   });
 
   const typesPath = getAbsPath('types.ts', baseDir);
-  await fs.writeFile(typesPath, fileTip + '\n' + genTsType(namespace, { messageMap, enumMap }));
+  await fs.writeFile(typesPath, fileTip + '\n' + genTsType(namespace, { root, messageMap, enumMap }));
 
   const servicesWithMethods: { [fullName: string]: TService & { methods: TMethod[] } } = {};
   services.forEach((service) => {
@@ -265,6 +273,7 @@ export async function gen(opt: Options): Promise<string> {
     const config = {
       messageMap,
       enumMap,
+      root,
     };
     const methodStrArr = serviceWithMethod.methods.map((method) => {
       const requestType = 'types.' + getTsType(method.requestType, packageName, config).tsType;
