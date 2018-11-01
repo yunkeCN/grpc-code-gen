@@ -119,7 +119,7 @@ function genTsType(namespace: TNamespace, config: {
           .map((field) => {
             const { tsType } = getTsType(field.type, message.fullName, config);
 
-            return `${space}  '${field.name}'${field.repeated ? '' : '?'}: `
+            return `${space}  '${field.name}'${field.required ? '' : '?'}: `
               + `${tsType}${field.repeated ? '[]' : ''};`;
           });
         return [
