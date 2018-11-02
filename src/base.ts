@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import { loadProto } from 'load-proto';
+import { IOption, loadProto } from 'load-proto';
 import { get, set } from 'lodash';
 import * as path from 'path';
 import { Root } from 'protobufjs';
@@ -169,26 +169,27 @@ function getImportPath(fromPath: string, toPath: string) {
   return relative;
 }
 
-export type Options = {
-  gitUrls: string[];
-  branch: string;
-  accessToken: string;
+export interface Options extends IOption {
   baseDir?: string;
   target?: 'javascript' | 'typescript'
-};
+}
 
 export async function gen(opt: Options): Promise<string> {
   const { baseDir = BASE_DIR, target = 'typescript' } = opt;
 
   const typescript = target === 'typescript';
 
+  fs.removeSync(baseDir);
+  console.info(`Clean dir: ${baseDir}`);
+
   fs.mkdirpSync(baseDir);
 
-  const { gitUrls, branch, accessToken } = opt;
+  const { gitUrls, branch, accessToken, resolvePath } = opt;
   const root = await loadProto({
     gitUrls,
     branch,
     accessToken,
+    resolvePath,
   });
   root.resolveAll();
 
@@ -204,7 +205,7 @@ export async function gen(opt: Options): Promise<string> {
     await fs.writeFile(grpcObjPath, [
       fileTip,
       `import * as grpc from 'grpc';`,
-      `import { loadFromJson } from '@yunke/load-proto';\n`,
+      `import { loadFromJson } from 'load-proto';\n`,
       `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
       `const grpcObject = grpc.loadPackageDefinition(loadFromJson(root));`,
       `export default grpcObject;`,
@@ -213,7 +214,7 @@ export async function gen(opt: Options): Promise<string> {
     await fs.writeFile(grpcObjPath, [
       fileTip,
       `const grpc = require('grpc');`,
-      `const { loadFromJson } = require('@yunke/load-proto');`,
+      `const { loadFromJson } = require('load-proto');`,
       `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
       `const grpcObject = grpc.loadPackageDefinition(loadFromJson(root));`,
       `module.exports = grpcObject;`,
