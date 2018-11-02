@@ -1,5 +1,5 @@
-import { loadProto } from '@yunke/load-proto';
 import * as fs from 'fs-extra';
+import { loadProto } from 'load-proto';
 import { get, set } from 'lodash';
 import * as path from 'path';
 import { Root } from 'protobufjs';
@@ -185,7 +185,11 @@ export async function gen(opt: Options): Promise<string> {
   fs.mkdirpSync(baseDir);
 
   const { gitUrls, branch, accessToken } = opt;
-  const root = await loadProto(gitUrls, branch, accessToken);
+  const root = await loadProto({
+    gitUrls,
+    branch,
+    accessToken,
+  });
   root.resolveAll();
 
   const json = root.toJSON({ keepComments: true });

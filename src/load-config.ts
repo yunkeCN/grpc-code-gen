@@ -1,4 +1,4 @@
-import { load } from '@yunke/load-git';
+import { load } from 'load-git';
 import * as program from 'commander';
 import * as fs from "fs";
 import * as path from "path";
@@ -19,7 +19,6 @@ program
   .option(
     '-t, --token [token]',
     'Access token for this repository',
-    'b1wZx77sDx1YQPLyLww3',
   )
   .parse(process.argv);
 
