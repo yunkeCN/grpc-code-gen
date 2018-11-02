@@ -14,6 +14,10 @@ grpc-code-gen gen -u git@git.myscrm.cn:2c/panther-statistics-proto.git,git@git.m
 //grpc-code-gen.config.js
 module.exports = {
   gitUrls: [
+    {
+      url: 'git@git.myscrm.cn:ykcommon/ykproto.git',
+      branch: 'master',
+    },
     'git@git.myscrm.cn:2c/panther-statistics-proto.git',
     'git@git.myscrm.cn:2c/panther-third-proto.git',
   ],
