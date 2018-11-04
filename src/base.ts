@@ -277,6 +277,8 @@ export async function gen(opt: Options): Promise<string> {
 
   const json = root.toJSON({ keepComments: true });
 
+  fs.mkdirpSync(path.join(process.cwd(), '.grpc-code-gen'));
+
   const jsonPath = path.join(process.cwd(), '.grpc-code-gen', 'root.json');
   await fs.writeJSON(jsonPath, json);
 
