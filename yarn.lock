@@ -897,9 +897,9 @@ json-schema@0.2.3:
   version "0.2.3"
   resolved "https://registry.npmjs.org/json-schema/-/json-schema-0.2.3.tgz#b480c892e59a2f05954ce727bd3f2a4e882f9e13"
 
-json-semantic@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.npmjs.org/json-semantic/-/json-semantic-0.1.0.tgz#0097197107fcbad84a442c593f0cb8a102ff634a"
+json-semantic@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/json-semantic/-/json-semantic-1.1.0.tgz#4d8b9841d1677b91f6d528e0c866f932df5c2f16"
   dependencies:
     jsondiffpatch "^0.3.11"
     lodash.clonedeep "^4.5.0"
