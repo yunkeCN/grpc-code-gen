@@ -51,9 +51,6 @@ if (dir) {
 }
 
 base.gen(opt as Options)
-  .then((dir: string) => {
-    console.info(`Generate success in ${dir}`);
-  })
   .catch((err) => {
     console.error(err);
   })

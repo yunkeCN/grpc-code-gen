@@ -12,6 +12,8 @@ base.gen({
   branch: 'test',
   accessToken: process.env.token,
   baseDir: `${__dirname}/code-gen`,
+  serviceCode: true,
+  jsonSemanticTypes: true,
   resolvePath: (origin: string, target: string, rootDir: string) => {
     if (/^git\.myscrm\.cn\/golang\/common\/proto\/(google|common)\//.test(target)) {
       return `${rootDir}/git.myscrm.cn/ykcommon/ykproto/${target.replace(/^git\.myscrm\.cn\/golang\/common\/proto\//, '')}`;

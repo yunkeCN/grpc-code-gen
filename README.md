@@ -49,13 +49,15 @@ grpc-code-gen gen
 
 ### Params
 
-参数 | 类型 | 说明
+参数 | 类型 | 说明 | 默认值
 ---|---|---
 gitUrls | string[] | 仓库地址数组
 branch |  string | 分支
 accessToken | string | git access token
-baseDir? | string | 生成目录
+baseDir? | string | 生成目录 | 
 target? | `javascript typescript` | 目标语言
+jsonSemanticTypes? | boolean | 生成json semantic types | `false`  
+serviceCode? | boolean | 生成客户端代码 | `true` 
 
 
 ## Program usage

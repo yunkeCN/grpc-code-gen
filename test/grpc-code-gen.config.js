@@ -10,6 +10,8 @@ module.exports = {
   branch: 'test',
   accessToken: process.env.token,
   baseDir: `${__dirname}/code-gen-cli`,
+  serviceCode: true,
+  jsonSemanticTypes: true,
   resolvePath: (origin, target, rootDir) => {
     if (/^git\.myscrm\.cn\/golang\/common\/proto\/(google|common)\//.test(target)) {
       return `${rootDir}/git.myscrm.cn/ykcommon/ykproto/${target.replace(/^git\.myscrm\.cn\/golang\/common\/proto\//, '')}`;
@@ -24,5 +26,5 @@ module.exports = {
     }
     return null;
   },
-  // target: 'javascript',
+  target: 'javascript',
 };
