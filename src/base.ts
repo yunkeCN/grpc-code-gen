@@ -412,7 +412,7 @@ export async function gen(opt: Options): Promise<string> {
           ...methodStrArr,
           `}`,
           `const Service: ${typeName} = get<any, string>(grpcObject, '${service.fullName}');`,
-          `Service.$FILE_NAME = '${service.filename}';`,
+          `Service.$FILE_NAME = '${service.filename.replace(/\\/g, '/')}';`,
           `
 Object.keys(Service.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
