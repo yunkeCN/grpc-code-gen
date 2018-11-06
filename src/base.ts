@@ -403,7 +403,7 @@ export async function gen(opt: Options): Promise<string> {
           fileTip,
           `import { get } from 'lodash';`,
           `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,
-          `import { ChannelCredentials } from "@grpc/grpc-js";`,
+          `import { ChannelCredentials } from "@grpc/grpc-js/build/src/channel-credentials";`,
           `import { promisify } from 'util';`,
           `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
           `export interface ${typeName} {`,
@@ -443,7 +443,7 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         // .d.ts
         await fs.writeFile(serviceDTsPath, [
           fileTip,
-          `import { ChannelCredentials } from "@grpc/grpc-js";`,
+          `import { ChannelCredentials } from "@grpc/grpc-js/build/src/channel-credentials";`,
           `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
           `export class ${service.name} {`,
           `  static $FILE_NAME: string;`,
