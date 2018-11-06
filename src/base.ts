@@ -288,7 +288,7 @@ export async function gen(opt: Options): Promise<string> {
   if (typescript) {
     await fs.writeFile(grpcObjPath, [
       fileTip,
-      `import * as grpc from 'grpc';`,
+      `import * as grpc from '@grpc/grpc-js';`,
       `import { loadFromJson } from 'load-proto';\n`,
       `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
       `const grpcObject = grpc.loadPackageDefinition(loadFromJson(root));`,
@@ -297,7 +297,7 @@ export async function gen(opt: Options): Promise<string> {
   } else {
     await fs.writeFile(grpcObjPath, [
       fileTip,
-      `const grpc = require('grpc');`,
+      `const grpc = require('@grpc/grpc-js');`,
       `const { loadFromJson } = require('load-proto');`,
       `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
       `const grpcObject = grpc.loadPackageDefinition(loadFromJson(root));`,
@@ -403,7 +403,7 @@ export async function gen(opt: Options): Promise<string> {
           fileTip,
           `import { get } from 'lodash';`,
           `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,
-          `import { ChannelCredentials } from "grpc";`,
+          `import { ChannelCredentials } from "@grpc/grpc-js";`,
           `import { promisify } from 'util';`,
           `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
           `export interface ${typeName} {`,
@@ -443,7 +443,7 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         // .d.ts
         await fs.writeFile(serviceDTsPath, [
           fileTip,
-          `import { ChannelCredentials } from "grpc";`,
+          `import { ChannelCredentials } from "@grpc/grpc-js";`,
           `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
           `export class ${service.name} {`,
           `  static $FILE_NAME: string;`,
