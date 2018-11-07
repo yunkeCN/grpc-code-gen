@@ -58,6 +58,19 @@ baseDir? | string | 生成目录 | `null`
 target? | `javascript typescript` | 目标语言 | `null`
 jsonSemanticTypes? | boolean | 生成json semantic types | `false`  
 serviceCode? | boolean | 生成客户端代码 | `true` 
+loaderOptions? | [LoaderOptions](#LoaderOptions) | loader生成配置 | `{ defaults: true }` 
+
+### LoaderOptions
+
+参数 | 类型 | 说明 | 默认值
+---|---|---|---
+keepCase? | boolean | Keeps field casing instead of converting to camel case | true
+alternateCommentMode? | boolean | Recognize double-slash comments in addition to doc-block comments. | false
+defaults? | boolean | Also sets default values on the resulting object | true
+arrays? | boolean | Sets empty arrays for missing repeated fields even if `defaults=false` | true
+objects? | boolean | Sets empty objects for missing map fields even if `defaults=false` | true
+oneofs? | boolean | Includes virtual oneof properties set to the present field's name, if any | true
+json? | boolean | Performs additional JSON compatibility conversions, i.e. NaN and Infinity to strings | true
 
 
 ## Program usage
