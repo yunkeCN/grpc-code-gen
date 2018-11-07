@@ -51,7 +51,7 @@ grpc-code-gen gen
 
 参数 | 类型 | 说明 | 默认值
 ---|---|---|---
-gitUrls | Array<string | {url: string, branch?: string, accessToken?: string}> | 仓库地址数组 | `null`
+gitUrls | Array<string \| {url: string, branch?: string, accessToken?: string}> | 仓库地址数组 | `null`
 branch |  string | 分支 | `null`
 accessToken | string | git access token | `null`
 baseDir? | string | 生成目录 | `null`
