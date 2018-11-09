@@ -249,28 +249,7 @@ export interface Options extends IOption {
   target?: 'javascript' | 'typescript';
   jsonSemanticTypes?: boolean;
   serviceCode?: boolean;
-  loaderOptions?: {
-    /** Keeps field casing instead of converting to camel case */
-    keepCase?: boolean;
-
-    /** Recognize double-slash comments in addition to doc-block comments. */
-    alternateCommentMode?: boolean;
-
-    /** Also sets default values on the resulting object */
-    defaults?: boolean;
-
-    /** Sets empty arrays for missing repeated fields even if `defaults=false` */
-    arrays?: boolean;
-
-    /** Sets empty objects for missing map fields even if `defaults=false` */
-    objects?: boolean;
-
-    /** Includes virtual oneof properties set to the present field's name, if any */
-    oneofs?: boolean;
-
-    /** Performs additional JSON compatibility conversions, i.e. NaN and Infinity to strings */
-    json?: boolean;
-  };
+  configFilePath: string;
 }
 
 export async function gen(opt: Options): Promise<string> {
@@ -279,7 +258,7 @@ export async function gen(opt: Options): Promise<string> {
     target = 'typescript',
     serviceCode = true,
     jsonSemanticTypes = false,
-    loaderOptions = { defaults: true },
+    configFilePath,
   } = opt;
 
   const typescript = target === 'typescript';
@@ -312,9 +291,17 @@ export async function gen(opt: Options): Promise<string> {
     await fs.writeFile(grpcObjPath, [
       fileTip,
       `import * as grpc from '@grpc/grpc-js';`,
+      `import * as fs from 'fs';`,
       `import { loadFromJson } from 'load-proto';\n`,
       `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
-      `const grpcObject = grpc.loadPackageDefinition(loadFromJson(root, ${JSON.stringify(loaderOptions)}));`,
+      `let config;`,
+      `if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath)}'))) {`,
+      `  config = require('${getImportPath(grpcObjPath, configFilePath)}');`,
+      `}`,
+      `const grpcObject = grpc.loadPackageDefinition(loadFromJson(`,
+      `  root,`,
+      `  (config && config.loaderOptions) || { defaults: true },`,
+      `));`,
       `export default grpcObject;`,
     ].join('\n'));
   } else {

@@ -29,13 +29,18 @@ const {
 
 const opt: any = {};
 
+let configFilePath = undefined;
 if (fs.existsSync(config)) {
   if (path.isAbsolute(config)) {
+    configFilePath = config;
     Object.assign(opt, require(config));
   } else {
-    Object.assign(opt, require(path.join(process.cwd(), config)));
+    configFilePath = path.join(process.cwd(), config);
+    Object.assign(opt, require(configFile));
   }
 }
+
+opt.configFilePath = configFilePath;
 
 if (url) {
   opt.gitUrls = url;
