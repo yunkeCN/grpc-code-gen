@@ -291,7 +291,9 @@ export async function gen(opt: Options): Promise<string> {
     await fs.writeFile(grpcObjPath, [
       fileTip,
       `import * as grpc from '@grpc/grpc-js';`,
+      `import { Metadata } from '@grpc/grpc-js/build/src/metadata';`,
       `import * as fs from 'fs';`,
+      `import { forOwn } from 'lodash';`,
       `import { loadFromJson } from 'load-proto';\n`,
       `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
       `let config;`,
@@ -301,7 +303,21 @@ export async function gen(opt: Options): Promise<string> {
       `const grpcObject = grpc.loadPackageDefinition(loadFromJson(`,
       `  root,`,
       `  (config && config.loaderOptions) || { defaults: true },`,
-      `));`,
+      `));\n`,
+      `// fix: grpc-message header split by comma
+Metadata.prototype.getMap = function() {
+  const result: any = {};
+  forOwn((this as any).internalRepr, (values, key) => {
+    if (values.length > 0) {
+      // const v = values[0];
+      result[key] = values.map((v: any) => {
+        return v instanceof Buffer ? v.slice() : v;
+      }).join(',')
+    }
+  });
+  return result;
+}
+      `,
       `export default grpcObject;`,
     ].join('\n'));
   } else {
