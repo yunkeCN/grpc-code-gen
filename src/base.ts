@@ -418,7 +418,7 @@ Metadata.prototype.getMap = function() {
         })
         .map((method) => {
           const requestType = 'types.' + getTsType(method.requestType, packageName, config).tsType;
-          const responseType = 'types.' + getTsType(method.responseType, packageName, config).tsType;
+          const responseType = `types.${getTsType(method.responseType, packageName, config).tsType} | {code:number,details:string,metadata:internalRepr:{}}`;
           return `  ${method.name}(request: ${requestType}): Promise<${responseType}>;`
         });
 
