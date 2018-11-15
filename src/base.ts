@@ -286,52 +286,6 @@ export async function gen(opt: Options): Promise<string> {
 
   const moduleSuffix = typescript ? 'ts' : 'js';
 
-  const grpcObjPath = getAbsPath(`grpcObj.${moduleSuffix}`, baseDir);
-  if (typescript) {
-    await fs.writeFile(grpcObjPath, [
-      fileTip,
-      `import * as grpc from '@grpc/grpc-js';`,
-      `import { Metadata } from '@grpc/grpc-js/build/src/metadata';`,
-      `import * as fs from 'fs';`,
-      `import { forOwn } from 'lodash';`,
-      `import { loadFromJson } from 'load-proto';\n`,
-      `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
-      `let config;`,
-      `if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath)}'))) {`,
-      `  config = require('${getImportPath(grpcObjPath, configFilePath)}');`,
-      `}`,
-      `const grpcObject = grpc.loadPackageDefinition(loadFromJson(`,
-      `  root,`,
-      `  (config && config.loaderOptions) || { defaults: true },`,
-      `));\n`,
-      `// fix: grpc-message header split by comma
-Metadata.prototype.getMap = function() {
-  const result: any = {};
-  forOwn((this as any).internalRepr, (values, key) => {
-    if (values.length > 0) {
-      // const v = values[0];
-      result[key] = values.map((v: any) => {
-        return v instanceof Buffer ? v.slice() : v;
-      }).join(',')
-    }
-  });
-  return result;
-}
-      `,
-      `export default grpcObject;`,
-    ].join('\n'));
-  } else {
-    await fs.writeFile(grpcObjPath, [
-      fileTip,
-      `const grpc = require('@grpc/grpc-js');`,
-      `const { loadFromJson } = require('load-proto');`,
-      `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
-      `const grpcObject = grpc.loadPackageDefinition(loadFromJson(root));`,
-      `module.exports = grpcObject;`,
-      `module.exports.default = grpcObject;`,
-    ].join('\n'));
-  }
-
   const result = inspectNamespace(root);
 
   if (!result) {
@@ -374,6 +328,52 @@ Metadata.prototype.getMap = function() {
   }
 
   if (serviceCode) {
+    const grpcObjPath = getAbsPath(`grpcObj.${moduleSuffix}`, baseDir);
+    if (typescript) {
+      await fs.writeFile(grpcObjPath, [
+        fileTip,
+        `import * as grpc from '@grpc/grpc-js';`,
+        `import { Metadata } from '@grpc/grpc-js/build/src/metadata';`,
+        `import * as fs from 'fs';`,
+        `import { forOwn } from 'lodash';`,
+        `import { loadFromJson } from 'load-proto';\n`,
+        `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
+        `let config;`,
+        `if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath)}'))) {`,
+        `  config = require('${getImportPath(grpcObjPath, configFilePath)}');`,
+        `}`,
+        `const grpcObject = grpc.loadPackageDefinition(loadFromJson(`,
+        `  root,`,
+        `  (config && config.loaderOptions) || { defaults: true },`,
+        `));\n`,
+        `// fix: grpc-message header split by comma
+Metadata.prototype.getMap = function() {
+  const result: any = {};
+  forOwn((this as any).internalRepr, (values, key) => {
+    if (values.length > 0) {
+      // const v = values[0];
+      result[key] = values.map((v: any) => {
+        return v instanceof Buffer ? v.slice() : v;
+      }).join(',')
+    }
+  });
+  return result;
+}
+      `,
+        `export default grpcObject;`,
+      ].join('\n'));
+    } else {
+      await fs.writeFile(grpcObjPath, [
+        fileTip,
+        `const grpc = require('@grpc/grpc-js');`,
+        `const { loadFromJson } = require('load-proto');`,
+        `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
+        `const grpcObject = grpc.loadPackageDefinition(loadFromJson(root));`,
+        `module.exports = grpcObject;`,
+        `module.exports.default = grpcObject;`,
+      ].join('\n'));
+    }
+
     const typesPath = getAbsPath('types.ts', baseDir);
 
     await fs.writeFile(
