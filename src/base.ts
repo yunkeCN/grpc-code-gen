@@ -323,7 +323,23 @@ export async function gen(opt: Options): Promise<string> {
       jsonSemanticTypesPath,
       fileTip + '\n'
       + 'import { ArraySchemaWithGenerics, BooleanSchema, NumberSchema, StringSchema } from \'json-semantic\';\n\n'
-      + genTsType(namespace, { root, messageMap, enumMap, withJsonSemantic: true }),
+      + genTsType(namespace, { root, messageMap, enumMap, withJsonSemantic: true })
+      + `
+export interface ICase<Request, Response> {
+    id: string;
+    name: string;
+    desc?: string;
+    request: Request;
+    response?: Response;
+    error?: {
+        code: number,
+        details: string,
+        metadata: {
+            internalRepr: {}
+        }
+    }
+}
+      `,
     );
   }
 
@@ -333,7 +349,6 @@ export async function gen(opt: Options): Promise<string> {
       await fs.writeFile(grpcObjPath, [
         fileTip,
         `import * as grpc from '@grpc/grpc-js';`,
-        `import { Metadata } from '@grpc/grpc-js/build/src/metadata';`,
         `import * as fs from 'fs';`,
         `import { forOwn } from 'lodash';`,
         `import { loadFromJson } from 'load-proto';\n`,
@@ -347,7 +362,7 @@ export async function gen(opt: Options): Promise<string> {
         `  (config && config.loaderOptions) || { defaults: true },`,
         `));\n`,
         `// fix: grpc-message header split by comma
-Metadata.prototype.getMap = function() {
+grpc.Metadata.prototype.getMap = function() {
   const result: any = {};
   forOwn((this as any).internalRepr, (values, key) => {
     if (values.length > 0) {
