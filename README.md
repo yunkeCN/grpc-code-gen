@@ -58,7 +58,14 @@ baseDir? | string | 生成目录 | `null`
 target? | `javascript typescript` | 目标语言 | `null`
 jsonSemanticTypes? | boolean | 生成json semantic types | `false`  
 serviceCode? | boolean | 生成客户端代码 | `true` 
-loaderOptions? | [LoaderOptions](https://github.com/grpc/grpc-node/tree/master/packages/proto-loader) | loader生成配置 | `{ defaults: true }` 
+loaderOptions? | [LoaderOptions](https://github.com/grpc/grpc-node/tree/master/packages/proto-loader) | loader生成配置 | `{ defaults: true }`
+callOptions? | [callOptions](#callOptions) | 方法调用配置 | null
+
+#### callOptions
+
+参数 | 类型 | 说明 | 默认值
+---|---|---|---
+timeout? | number | 超时时间，单位：ms | undefined 
 
 ## Program usage
 ```js

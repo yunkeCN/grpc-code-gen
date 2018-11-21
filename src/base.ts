@@ -354,9 +354,9 @@ export interface ICase<Request, Response> {
         `import { loadFromJson } from 'load-proto';\n`,
         `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
         `let config;`,
-        `if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath)}'))) {`,
-        `  config = require('${getImportPath(grpcObjPath, configFilePath)}');`,
-        `}`,
+`if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath)}'))) {
+  config = require('${getImportPath(grpcObjPath, configFilePath)}');
+}`,
         `const grpcObject = grpc.loadPackageDefinition(loadFromJson(`,
         `  root,`,
         `  (config && config.loaderOptions) || { defaults: true },`,
@@ -434,9 +434,13 @@ grpc.Metadata.prototype.getMap = function() {
         .map((method) => {
           const requestType = 'types.' + getTsType(method.requestType, packageName, config).tsType;
           const responseType = `types.${getTsType(method.responseType, packageName, config).tsType}`;
-          return `  ${method.name}(request: ${requestType}): Promise<${responseType}>;`
+          return `  ${method.name}(
+    request: ${requestType},
+    options?: { timeout?: number; flags?: number; host?: string; },
+    callback?: (err: Error, response: ${responseType}) => void,
+  ): Promise<${responseType}>;
+`
         });
-
 
       if (typescript) {
         const typeName = 'I' + service.name;
@@ -446,10 +450,11 @@ grpc.Metadata.prototype.getMap = function() {
           `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,
           `import { ChannelCredentials } from "@grpc/grpc-js/build/src/channel-credentials";`,
           `import { promisify } from 'util';`,
-          `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
+          `import * as types from '${getImportPath(servicePath, typesPath)}';\n`,
+          `const config = require('${getImportPath(servicePath, configFilePath)}');\n`,
           `export interface ${typeName} {`,
           `  $FILE_NAME: string;`,
-          `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};`,
+          `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};\n`,
           ...methodStrArr,
           `}`,
           `const Service: ${typeName} = get<any, string>(grpcObject, '${service.fullName}');`,
@@ -457,7 +462,21 @@ grpc.Metadata.prototype.getMap = function() {
           `
 Object.keys(Service.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
-    Service.prototype[key] = promisify(Service.prototype[key]);
+    const origin = Service.prototype[key];
+    Service.prototype[key] = promisify(function(this: any, request: any, options: any, callback: any) {
+      if (typeof callback !== 'undefined') {
+        options = Object.assign(config.callOptions || {}, options) || {};
+      } else {
+        callback = options;
+        options = config.callOptions || {};
+      }
+
+      if (typeof options.timeout === 'number') {
+        options.deadline = Date.now() + options.timeout; 
+      }
+
+      return (origin as any).apply(this, [request, options, callback]);
+    });
   }
 });`,
           `export const ${service.name}: ${typeName} = Service;`,
@@ -469,12 +488,27 @@ Object.keys(Service.prototype).forEach((key) => {
           `const { get } = require('lodash');`,
           `const { promisify } = require('util');`,
           `const grpcObject = require('${getImportPath(servicePath, grpcObjPath)}');\n`,
+          `const config = require('${getImportPath(servicePath, configFilePath)}');\n`,
           `const ${service.name} = get(grpcObject, '${service.fullName}');`,
           `${service.name}.$FILE_NAME = '${service.filename}';`,
           `
 Object.keys(${service.name}.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
-    ${service.name}.prototype[key] = promisify(${service.name}.prototype[key]);
+    const origin = ${service.name}.prototype[key];
+    ${service.name}.prototype[key] = promisify(function(request, options, callback) {
+      if (typeof callback !== 'undefined') {
+        options = Object.assign(config.callOptions || {}, options) || {};
+      } else {
+        callback = options;
+        options = config.callOptions || {};
+      }
+
+      if (typeof options.timeout === 'number') {
+        options.deadline = Date.now() + options.timeout; 
+      }
+
+      return origin.apply(this, [request, options, callback]);
+    });
   }
 });`,
           `module.exports.${service.name} = ${service.name};\n`,

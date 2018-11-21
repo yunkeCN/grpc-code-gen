@@ -40,6 +40,11 @@ if (fs.existsSync(config)) {
   }
 }
 
+if (!configFilePath) {
+  console.error('Must set config file: grpc-code-gen.config.js');
+  process.exit(1);
+}
+
 opt.configFilePath = configFilePath;
 
 if (url) {
