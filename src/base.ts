@@ -452,6 +452,7 @@ grpc.Metadata.prototype.getMap = function() {
           `import { promisify } from 'util';`,
           `import * as types from '${getImportPath(servicePath, typesPath)}';\n`,
           `const config = require('${getImportPath(servicePath, configFilePath)}');\n`,
+          `const callOptions = config.callOptions ? { ...config.callOptions } : {} \n`,
           `export interface ${typeName} {`,
           `  $FILE_NAME: string;`,
           `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};\n`,
@@ -465,10 +466,10 @@ Object.keys(Service.prototype).forEach((key) => {
     const origin = Service.prototype[key];
     Service.prototype[key] = promisify(function(this: any, request: any, options: any, callback: any) {
       if (typeof callback !== 'undefined') {
-        options = Object.assign(config.callOptions || {}, options) || {};
+        options = Object.assign({}, callOptions, options) || {};
       } else {
         callback = options;
-        options = config.callOptions || {};
+        options = { ... callOptions };
       }
 
       if (typeof options.timeout === 'number') {
@@ -489,6 +490,7 @@ Object.keys(Service.prototype).forEach((key) => {
           `const { promisify } = require('util');`,
           `const grpcObject = require('${getImportPath(servicePath, grpcObjPath)}');\n`,
           `const config = require('${getImportPath(servicePath, configFilePath)}');\n`,
+          `const callOptions = config.callOptions ? { ...config.callOptions } : {} \n`,
           `const ${service.name} = get(grpcObject, '${service.fullName}');`,
           `${service.name}.$FILE_NAME = '${service.filename}';`,
           `
@@ -497,10 +499,10 @@ Object.keys(${service.name}.prototype).forEach((key) => {
     const origin = ${service.name}.prototype[key];
     ${service.name}.prototype[key] = promisify(function(request, options, callback) {
       if (typeof callback !== 'undefined') {
-        options = Object.assign(config.callOptions || {}, options) || {};
+        options = Object.assign({}, callOptions, options) || {};
       } else {
         callback = options;
-        options = config.callOptions || {};
+        options = { ...callOptions };
       }
 
       if (typeof options.timeout === 'number') {
