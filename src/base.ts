@@ -469,7 +469,7 @@ Object.keys(Service.prototype).forEach((key) => {
         options = Object.assign({}, callOptions, options) || {};
       } else {
         callback = options;
-        options = { ... callOptions };
+        options = { ...callOptions };
       }
 
       if (typeof options.timeout === 'number') {
