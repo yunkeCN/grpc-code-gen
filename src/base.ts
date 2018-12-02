@@ -250,6 +250,7 @@ export interface Options extends IOption {
   jsonSemanticTypes?: boolean;
   serviceCode?: boolean;
   configFilePath: string;
+  grpcNative?: boolean;
 }
 
 export async function gen(opt: Options): Promise<string> {
@@ -259,16 +260,21 @@ export async function gen(opt: Options): Promise<string> {
     serviceCode = true,
     jsonSemanticTypes = false,
     configFilePath,
+    gitUrls,
+    branch,
+    accessToken,
+    resolvePath,
+    grpcNative,
   } = opt;
 
   const typescript = target === 'typescript';
+  const grpcNpmName = grpcNative ? 'grpc' : '@grpc/grpc-js';
 
   fs.removeSync(baseDir);
   console.info(`Clean dir: ${baseDir}`);
 
   fs.mkdirpSync(baseDir);
 
-  const { gitUrls, branch, accessToken, resolvePath } = opt;
   const root = await loadProto({
     gitUrls,
     branch,
@@ -348,7 +354,7 @@ export interface ICase<Request, Response> {
     if (typescript) {
       await fs.writeFile(grpcObjPath, [
         fileTip,
-        `import * as grpc from '@grpc/grpc-js';`,
+        `import * as grpc from '${grpcNpmName}';`,
         `import * as fs from 'fs';`,
         `import { forOwn } from 'lodash';`,
         `import { loadFromJson } from 'load-proto';\n`,
@@ -380,7 +386,7 @@ grpc.Metadata.prototype.getMap = function() {
     } else {
       await fs.writeFile(grpcObjPath, [
         fileTip,
-        `const grpc = require('@grpc/grpc-js');`,
+        `const grpc = require('${grpcNpmName}');`,
         `const { loadFromJson } = require('load-proto');`,
         `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
         `const grpcObject = grpc.loadPackageDefinition(loadFromJson(root));`,
@@ -448,7 +454,7 @@ grpc.Metadata.prototype.getMap = function() {
           fileTip,
           `import { get } from 'lodash';`,
           `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,
-          `import { ChannelCredentials } from "@grpc/grpc-js/build/src/channel-credentials";`,
+          `import { ChannelCredentials } from "${grpcNative ? 'grpc' : '@grpc/grpc-js/build/src/channel-credentials'}";`,
           `import { promisify } from 'util';`,
           `import * as types from '${getImportPath(servicePath, typesPath)}';\n`,
           `const config = require('${getImportPath(servicePath, configFilePath)}');\n`,
@@ -520,7 +526,7 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         // .d.ts
         await fs.writeFile(serviceDTsPath, [
           fileTip,
-          `import { ChannelCredentials } from "@grpc/grpc-js/build/src/channel-credentials";`,
+          `import { ChannelCredentials } from "${grpcNative ? 'grpc' : '@grpc/grpc-js/build/src/channel-credentials'}";`,
           `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
           `export class ${service.name} {`,
           `  static $FILE_NAME: string;`,
