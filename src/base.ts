@@ -488,9 +488,9 @@ Object.keys(Service.prototype).forEach((key) => {
       return (origin as any).apply(this, [request, options, function(err: any, response: any) {
         if (!logOptions.disable) {
           const duration = (Date.now() - start) / 1000;
-          console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', request);
+          console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request));
           if (err) {
-            console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', request, 'err:', err);
+            console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request), 'err:', err);
           }
         }
         callback(err, response);
@@ -532,9 +532,9 @@ Object.keys(${service.name}.prototype).forEach((key) => {
       return origin.apply(this, [request, options, function(err: any, response: any) {
         if (!logOptions.disable) {
           const duration = (Date.now() - start) / 1000;
-          console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', request);
+          console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request));
           if (err) {
-            console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', request, 'err:', err);
+            console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request), 'err:', err);
           }
         }
         callback(err, response);
