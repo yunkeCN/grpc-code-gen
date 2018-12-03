@@ -61,12 +61,20 @@ jsonSemanticTypes? | boolean | 生成json semantic types | `false`
 serviceCode? | boolean | 生成客户端代码 | `true` 
 loaderOptions? | [LoaderOptions](https://github.com/grpc/grpc-node/tree/master/packages/proto-loader) | loader生成配置 | `{ defaults: true }`
 callOptions? | [callOptions](#callOptions) | 方法调用配置 | null
+logOptions? | [logOptions](#logOptions) | 日志配置 | null
 
 #### callOptions
 
 参数 | 类型 | 说明 | 默认值
 ---|---|---|---
-timeout? | number | 超时时间，单位：ms | undefined 
+timeout? | number | 超时时间，单位：ms | undefined
+
+#### callOptions
+
+参数 | 类型 | 说明 | 默认值
+---|---|---|---
+disable? | boolean | 是否启用 | false
+attributes? | string[] | 记录字段，`request, response` | ['request'] 
 
 ## Program usage
 ```js

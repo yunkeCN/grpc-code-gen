@@ -458,6 +458,7 @@ grpc.Metadata.prototype.getMap = function() {
           `import { promisify } from 'util';`,
           `import * as types from '${getImportPath(servicePath, typesPath)}';\n`,
           `const config = require('${getImportPath(servicePath, configFilePath)}');\n`,
+          `const logOptions = config.logOptions ? { ...config.logOptions } : { enable: true, attributes: ['request'] } \n`,
           `const callOptions = config.callOptions ? { ...config.callOptions } : {} \n`,
           `export interface ${typeName} {`,
           `  $FILE_NAME: string;`,
@@ -482,7 +483,17 @@ Object.keys(Service.prototype).forEach((key) => {
         options.deadline = Date.now() + options.timeout; 
       }
 
-      return (origin as any).apply(this, [request, options, callback]);
+      const start = Date.now();
+      return (origin as any).apply(this, [request, options, function(err, response) {
+        if (!logOptions.disable) {
+          const duration = (Date.now() - start) / 1000;
+          console.info('grpc invoke:', key, 'duration:', duration + 's', 'request:', request);
+          if (err) {
+            console.error('grpc invoke:', key, 'duration:', duration + 's', 'request:', request, 'err:', err);
+          }
+        }
+        callback(err, response);
+      }]);
     });
   }
 });`,
@@ -496,6 +507,7 @@ Object.keys(Service.prototype).forEach((key) => {
           `const { promisify } = require('util');`,
           `const grpcObject = require('${getImportPath(servicePath, grpcObjPath)}');\n`,
           `const config = require('${getImportPath(servicePath, configFilePath)}');\n`,
+          `const logOptions = config.logOptions ? { ...config.logOptions } : { enable: true, attributes: ['request'] } \n`,
           `const callOptions = config.callOptions ? { ...config.callOptions } : {} \n`,
           `const ${service.name} = get(grpcObject, '${service.fullName}');`,
           `${service.name}.$FILE_NAME = '${service.filename}';`,
@@ -515,7 +527,16 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         options.deadline = Date.now() + options.timeout; 
       }
 
-      return origin.apply(this, [request, options, callback]);
+      return origin.apply(this, [request, options, function(err, response) {
+        if (!logOptions.disable) {
+          const duration = (Date.now() - start) / 1000;
+          console.info('grpc invoke:', key, 'duration:', duration + 's', 'request:', request);
+          if (err) {
+            console.error('grpc invoke:', key, 'duration:', duration + 's', 'request:', request, 'err:', err);
+          }
+        }
+        callback(err, response);
+      }]);
     });
   }
 });`,
