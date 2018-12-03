@@ -471,6 +471,7 @@ grpc.Metadata.prototype.getMap = function() {
 Object.keys(Service.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
     const origin = Service.prototype[key];
+    const methodId = origin.path.replace(/\\//g, '.').replace(/^\\./, '');
     Service.prototype[key] = promisify(function(this: any, request: any, options: any, callback: any) {
       if (typeof callback !== 'undefined') {
         options = Object.assign({}, callOptions, options) || {};
@@ -487,9 +488,9 @@ Object.keys(Service.prototype).forEach((key) => {
       return (origin as any).apply(this, [request, options, function(err: any, response: any) {
         if (!logOptions.disable) {
           const duration = (Date.now() - start) / 1000;
-          console.info('grpc invoke:', key, 'duration:', duration + 's', 'request:', request);
+          console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', request);
           if (err) {
-            console.error('grpc invoke:', key, 'duration:', duration + 's', 'request:', request, 'err:', err);
+            console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', request, 'err:', err);
           }
         }
         callback(err, response);
@@ -515,6 +516,7 @@ Object.keys(Service.prototype).forEach((key) => {
 Object.keys(${service.name}.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
     const origin = ${service.name}.prototype[key];
+    const methodId = origin.path.replace(/\\//g, '.').replace(/^\\./, '');
     ${service.name}.prototype[key] = promisify(function(request, options, callback) {
       if (typeof callback !== 'undefined') {
         options = Object.assign({}, callOptions, options) || {};
@@ -530,9 +532,9 @@ Object.keys(${service.name}.prototype).forEach((key) => {
       return origin.apply(this, [request, options, function(err: any, response: any) {
         if (!logOptions.disable) {
           const duration = (Date.now() - start) / 1000;
-          console.info('grpc invoke:', key, 'duration:', duration + 's', 'request:', request);
+          console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', request);
           if (err) {
-            console.error('grpc invoke:', key, 'duration:', duration + 's', 'request:', request, 'err:', err);
+            console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', request, 'err:', err);
           }
         }
         callback(err, response);
