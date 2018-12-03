@@ -484,7 +484,7 @@ Object.keys(Service.prototype).forEach((key) => {
       }
 
       const start = Date.now();
-      return (origin as any).apply(this, [request, options, function(err, response) {
+      return (origin as any).apply(this, [request, options, function(err: any, response: any) {
         if (!logOptions.disable) {
           const duration = (Date.now() - start) / 1000;
           console.info('grpc invoke:', key, 'duration:', duration + 's', 'request:', request);
@@ -527,7 +527,7 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         options.deadline = Date.now() + options.timeout; 
       }
 
-      return origin.apply(this, [request, options, function(err, response) {
+      return origin.apply(this, [request, options, function(err: any, response: any) {
         if (!logOptions.disable) {
           const duration = (Date.now() - start) / 1000;
           console.info('grpc invoke:', key, 'duration:', duration + 's', 'request:', request);
