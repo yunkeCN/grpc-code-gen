@@ -372,7 +372,7 @@ grpc.Metadata.prototype.getMap = function() {
   const result: any = {};
   const collection = (this as any).internalRepr;
   if (collection.forEach) {
-    (this as any).internalRepr.forEach((values: any, key: string) => {
+    collection.forEach((values: any, key: string) => {
       if (values.length > 0) {
         result[key] = values.map((v: any) => {
           return v instanceof Buffer ? v.slice() : v;
