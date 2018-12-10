@@ -56,7 +56,7 @@ branch |  string | 分支 | `null`
 accessToken | string | git access token | `null`
 baseDir? | string | 生成目录 | `null`
 target? | `javascript typescript` | 目标语言 | `null`
-grpcNative? | boolean | 是否使用grpc native包 | `false`
+grpcNpmName? | string | grpc npm name, 可取值：`grpc`, `@grpc/grpc-js`, `@yued/grpc-js` | `@grpc/grpc-js`
 jsonSemanticTypes? | boolean | 生成json semantic types | `false`  
 serviceCode? | boolean | 生成客户端代码 | `true` 
 loaderOptions? | [LoaderOptions](https://github.com/grpc/grpc-node/tree/master/packages/proto-loader) | loader生成配置 | `{ defaults: true }`

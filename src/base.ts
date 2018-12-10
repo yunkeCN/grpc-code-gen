@@ -250,7 +250,7 @@ export interface Options extends IOption {
   jsonSemanticTypes?: boolean;
   serviceCode?: boolean;
   configFilePath: string;
-  grpcNative?: boolean;
+  grpcNpmName?: string;
 }
 
 export async function gen(opt: Options): Promise<string> {
@@ -264,11 +264,11 @@ export async function gen(opt: Options): Promise<string> {
     branch,
     accessToken,
     resolvePath,
-    grpcNative,
+    grpcNpmName = '@grpc/grpc-js',
   } = opt;
 
   const typescript = target === 'typescript';
-  const grpcNpmName = grpcNative ? 'grpc' : '@grpc/grpc-js';
+  const grpcNative = grpcNpmName === 'grpc';
 
   fs.removeSync(baseDir);
   console.info(`Clean dir: ${baseDir}`);
@@ -360,7 +360,7 @@ export interface ICase<Request, Response> {
         `import { loadFromJson } from 'load-proto';\n`,
         `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
         `let config;`,
-`if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath)}'))) {
+        `if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath)}'))) {
   config = require('${getImportPath(grpcObjPath, configFilePath)}');
 }`,
         `const grpcObject = grpc.loadPackageDefinition(loadFromJson(`,
@@ -454,7 +454,7 @@ grpc.Metadata.prototype.getMap = function() {
           fileTip,
           `import { get } from 'lodash';`,
           `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,
-          `import { ChannelCredentials } from "${grpcNative ? 'grpc' : '@grpc/grpc-js/build/src/channel-credentials'}";`,
+          `import { ChannelCredentials } from "${grpcNative ? 'grpc' : `${grpcNpmName}/build/src/channel-credentials`}";`,
           `import { promisify } from 'util';`,
           `import * as types from '${getImportPath(servicePath, typesPath)}';\n`,
           `const config = require('${getImportPath(servicePath, configFilePath)}');\n`,
@@ -549,7 +549,7 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         // .d.ts
         await fs.writeFile(serviceDTsPath, [
           fileTip,
-          `import { ChannelCredentials } from "${grpcNative ? 'grpc' : '@grpc/grpc-js/build/src/channel-credentials'}";`,
+          `import { ChannelCredentials } from "${grpcNative ? 'grpc' : `${grpcNpmName}/build/src/channel-credentials`}";`,
           `import * as types from '${getImportPath(serviceDTsPath, typesPath)}';\n`,
           `export class ${service.name} {`,
           `  static $FILE_NAME: string;`,
