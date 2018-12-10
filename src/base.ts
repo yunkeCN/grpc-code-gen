@@ -370,14 +370,25 @@ export interface ICase<Request, Response> {
         `// fix: grpc-message header split by comma
 grpc.Metadata.prototype.getMap = function() {
   const result: any = {};
-  forOwn((this as any).internalRepr, (values, key) => {
-    if (values.length > 0) {
-      // const v = values[0];
-      result[key] = values.map((v: any) => {
-        return v instanceof Buffer ? v.slice() : v;
-      }).join(',')
-    }
-  });
+  const collection = (this as any).internalRepr;
+  if (collection.forEach) {
+    (this as any).internalRepr.forEach((values: any, key: string) => {
+      if (values.length > 0) {
+        result[key] = values.map((v: any) => {
+          return v instanceof Buffer ? v.slice() : v;
+        }).join(',')
+      }
+    });
+  } else {
+    forOwn(collection, (values, key) => {
+      if (values.length > 0) {
+        // const v = values[0];
+        result[key] = values.map((v: any) => {
+          return v instanceof Buffer ? v.slice() : v;
+        }).join('.')
+      }
+    });
+  }
   return result;
 }
       `,
