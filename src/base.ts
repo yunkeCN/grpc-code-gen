@@ -524,11 +524,15 @@ Object.keys(Service.prototype).forEach((key) => {
           `const ${service.name} = get(grpcObject, '${service.fullName}');`,
           `${service.name}.$FILE_NAME = '${service.filename}';`,
           `
+const maxTry = 3;
+
 Object.keys(${service.name}.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
     const origin = ${service.name}.prototype[key];
     const methodId = origin.path.replace(/\\//g, '.').replace(/^\\./, '');
     ${service.name}.prototype[key] = promisify(function(request, options, callback) {
+      let count = 0;
+
       if (typeof callback !== 'undefined') {
         options = Object.assign({}, callOptions, options) || {};
       } else {
@@ -536,20 +540,33 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         options = { ...callOptions };
       }
 
-      if (typeof options.timeout === 'number') {
-        options.deadline = Date.now() + options.timeout; 
+      function doCall(self: any) {
+        if (typeof options.timeout === 'number') {
+          options.deadline = Date.now() + options.timeout;
+        }
+
+        const start = Date.now();
+        (origin as any).apply(self, [request, options, function(err: any, response: any) {
+          if (!logOptions.disable) {
+            const duration = (Date.now() - start) / 1000;
+            console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request));
+            if (err) {
+              console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request), 'err:', err);
+            }
+          }
+
+          if (count < maxTry && /^Internal HTTP2 error/.test(err.details || err.message || err.data)) {
+            count++;
+            setTimeout(() => {
+              doCall(self);
+            }, 25);
+          } else {
+            callback(err, response);
+          }
+        }]);
       }
 
-      return origin.apply(this, [request, options, function(err: any, response: any) {
-        if (!logOptions.disable) {
-          const duration = (Date.now() - start) / 1000;
-          console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request));
-          if (err) {
-            console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request), 'err:', err);
-          }
-        }
-        callback(err, response);
-      }]);
+      doCall.call(this);
     });
   }
 });`,
