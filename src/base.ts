@@ -479,11 +479,15 @@ grpc.Metadata.prototype.getMap = function() {
           `const Service: ${typeName} = get<any, string>(grpcObject, '${service.fullName}');`,
           `Service.$FILE_NAME = '${service.filename.replace(/\\/g, '/')}';`,
           `
+const maxTry = 3;
+
 Object.keys(Service.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
     const origin = Service.prototype[key];
     const methodId = origin.path.replace(/\\//g, '.').replace(/^\\./, '');
     Service.prototype[key] = promisify(function(this: any, request: any, options: any, callback: any) {
+      let count = 0;
+
       if (typeof callback !== 'undefined') {
         options = Object.assign({}, callOptions, options) || {};
       } else {
@@ -491,21 +495,33 @@ Object.keys(Service.prototype).forEach((key) => {
         options = { ...callOptions };
       }
 
-      if (typeof options.timeout === 'number') {
-        options.deadline = Date.now() + options.timeout; 
+      function doCall(self: any) {
+        if (typeof options.timeout === 'number') {
+          options.deadline = Date.now() + options.timeout;
+        }
+
+        const start = Date.now();
+        (origin as any).apply(self, [request, options, function(err: any, response: any) {
+          if (!logOptions.disable) {
+            const duration = (Date.now() - start) / 1000;
+            console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request));
+            if (err) {
+              console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request), 'err:', err);
+            }
+          }
+
+          if (count < maxTry && /^Internal HTTP2 error/.test(err.details || err.message || err.data)) {
+            count++;
+            setTimeout(() => {
+              doCall(self);
+            }, 25);
+          } else {
+            callback(err, response);
+          }
+        }]);
       }
 
-      const start = Date.now();
-      return (origin as any).apply(this, [request, options, function(err: any, response: any) {
-        if (!logOptions.disable) {
-          const duration = (Date.now() - start) / 1000;
-          console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request));
-          if (err) {
-            console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request), 'err:', err);
-          }
-        }
-        callback(err, response);
-      }]);
+      doCall.call(this);
     });
   }
 });`,
@@ -546,7 +562,7 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         }
 
         const start = Date.now();
-        (origin as any).apply(self, [request, options, function(err: any, response: any) {
+        origin.apply(self, [request, options, function(err, response) {
           if (!logOptions.disable) {
             const duration = (Date.now() - start) / 1000;
             console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request));
