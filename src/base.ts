@@ -385,7 +385,7 @@ grpc.Metadata.prototype.getMap = function() {
         // const v = values[0];
         result[key] = values.map((v: any) => {
           return v instanceof Buffer ? v.slice() : v;
-        }).join('.')
+        }).join(',')
       }
     });
   }
