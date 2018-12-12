@@ -521,7 +521,7 @@ Object.keys(Service.prototype).forEach((key) => {
         }]);
       }
 
-      doCall.call(this);
+      doCall(this);
     });
   }
 });`,
@@ -556,7 +556,7 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         options = { ...callOptions };
       }
 
-      function doCall(self: any) {
+      function doCall(self) {
         if (typeof options.timeout === 'number') {
           options.deadline = Date.now() + options.timeout;
         }
@@ -582,7 +582,7 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         }]);
       }
 
-      doCall.call(this);
+      doCall(this);
     });
   }
 });`,
