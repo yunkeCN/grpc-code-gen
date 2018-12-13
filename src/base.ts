@@ -510,7 +510,7 @@ Object.keys(Service.prototype).forEach((key) => {
             }
           }
 
-          if (count < maxTry && /^Internal HTTP2 error/.test(err.details || err.message || err.data)) {
+          if (err && count < maxTry && /^Internal HTTP2 error/.test(err.details || err.message || err.data)) {
             count++;
             setTimeout(() => {
               doCall(self);
@@ -571,7 +571,7 @@ Object.keys(${service.name}.prototype).forEach((key) => {
             }
           }
 
-          if (count < maxTry && /^Internal HTTP2 error/.test(err.details || err.message || err.data)) {
+          if (err && count < maxTry && /^Internal HTTP2 error/.test(err.details || err.message || err.data)) {
             count++;
             setTimeout(() => {
               doCall(self);
