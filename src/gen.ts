@@ -21,7 +21,7 @@ program
 
 const {
   url,
-  branch,
+  branch = process.env.branch,
   token,
   dir,
   config,
