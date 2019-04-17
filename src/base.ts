@@ -477,7 +477,7 @@ grpc.Metadata.prototype.getMap = function() {
           ...methodStrArr,
           `}`,
           `const Service: ${typeName} = get<any, string>(grpcObject, '${service.fullName}');`,
-          `Service.$FILE_NAME = '${service.filename.replace(/\\/g, '/')}';`,
+          `Service.$FILE_NAME = '${service.filename && service.filename.replace(/\\/g, '/')}';`,
           `
 const maxTry = 3;
 

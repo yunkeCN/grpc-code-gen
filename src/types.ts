@@ -31,7 +31,7 @@ export interface TField {
 export interface TMessage extends TBase {
   fields: TField[];
 
-  filename: string;
+  filename: string | null;
 }
 
 export interface TEnum extends TBase {
@@ -39,7 +39,7 @@ export interface TEnum extends TBase {
 
   comments: { [key: string]: string };
 
-  filename: string;
+  filename: string | null;
 }
 
 export interface TMethod extends TBase {
@@ -65,5 +65,5 @@ export interface TService extends TBase {
 
   author: string;
 
-  filename: string;
+  filename: string | null;
 }

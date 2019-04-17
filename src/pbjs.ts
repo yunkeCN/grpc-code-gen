@@ -169,7 +169,7 @@ function inspectType(message: Type): {
     fullName: formatFullName(message.fullName),
     comment: message.comment as string,
     fields,
-    filename: (message.filename as string).replace(/^.+\/.load-proto-cache\/[^/]+\//, ''),
+    filename: message.filename && (message.filename as string).replace(/^.+\/.load-proto-cache\/[^/]+\//, ''),
   });
   return {
     json: typeClone,
@@ -191,7 +191,7 @@ function inspectEnum(enum1: Enum): {
     fullName: formatFullName(enum1.fullName),
     comment: enum1.comment as string,
     comments: enum1.comments,
-    filename: (enum1.filename as string).replace(/^.+\/.load-proto-cache\/[^/]+\//, ''),
+    filename: enum1.filename && (enum1.filename as string).replace(/^.+\/.load-proto-cache\/[^/]+\//, ''),
   };
 
   collectEnums.push(clone);
@@ -279,7 +279,7 @@ function inspectService(service: Service): {
   collectServices.push({
     ...restClone,
     methods: collectMethods,
-    filename: (service.filename as string).replace(/^.+\/.load-proto-cache\/[^/]+\//, ''),
+    filename: service.filename && (service.filename as string).replace(/^.+\/.load-proto-cache\/[^/]+\//, ''),
   });
 
   return {
