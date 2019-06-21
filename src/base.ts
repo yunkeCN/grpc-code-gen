@@ -391,11 +391,11 @@ grpc.Metadata.prototype.getMap = function() {
     });
   }
   return result;
-}
-// add metadata for response
-grpc.Client.prototype.handleUnaryResponse = function (call, deserialize, callback) {
-  let responseMessage = null;
-  call.on('data', (data) => {
+};
+
+(grpc.Client.prototype as any).handleUnaryResponse = function(call: any, deserialize: any, callback: any) {
+  let responseMessage:any = null;
+  call.on('data', (data: any) => {
     if (responseMessage != null) {
       call.cancelWithStatus(Status.INTERNAL, 'Too many responses received');
     }
@@ -410,7 +410,7 @@ grpc.Client.prototype.handleUnaryResponse = function (call, deserialize, callbac
       call.cancelWithStatus(Status.INTERNAL, 'Not enough responses received');
     }
   });
-  call.on('status', (status) => {
+  call.on('status', (status: any) => {
     // 增加返回参数metadata
     if (status.code === Status.OK) {
       callback(null, responseMessage, status.metadata);
