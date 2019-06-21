@@ -458,10 +458,16 @@ grpc.Metadata.prototype.getMap = function() {
   ): Promise<${responseType}>;
   ${method.name}(
     request: ${requestType},
-    metadata: { [key: string]: string | Buffer },
+    metadata: MetadataMap,
     options?: { timeout?: number; flags?: number; host?: string; },
     callback?: (err: Error, response: ${responseType}, metadata: Metadata) => void,
   ): Promise<${responseType}>;
+  ${method.name}V2(option: {
+    request: ${requestType};
+    metadata?: MetadataMap;
+    options?: { timeout?: number; flags?: number; host?: string; };
+    callback?: (err: Error, response: ${responseType}, metadata: Metadata) => void;
+  }): Promise<${responseType}>;
 `
         });
 
@@ -491,6 +497,12 @@ const maxTry = 3;
 
 type MetadataMap = { [key: string]: string | Buffer };
 
+interface ReqOptions {
+  request: any;
+  metadata?: Metadata;
+  options: any;
+}
+
 function toMetadata(metadata: MetadataMap): Metadata {
   const metadataIns = new grpc.Metadata();
   if (metadata && typeof metadata === "object") {
@@ -505,7 +517,7 @@ Object.keys(Service.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
     const origin = Service.prototype[key];
     const methodId = origin.path.replace(/\\//g, '.').replace(/^\\./, '');
-    Service.prototype[key] = promisify(function(this: any, request: any, metadata: MetadataMap, options: any, callback: any) {
+    const wrapper = function(this: any, request: any, metadata: MetadataMap, options: any, callback: any) {
       let count = 0;
 
       if (typeof callback !== 'undefined') {
@@ -542,7 +554,20 @@ Object.keys(Service.prototype).forEach((key) => {
       }
 
       doCall(this);
-    });
+    };
+    Service.prototype[key] = promisify(wrapper);
+    Service.prototype[\`\$\{key\}V2\`] = function(option: ReqOptions) {
+      const { request, metadata, options } = option;
+      return new Promise((resolve, reject) => {
+        wrapper.call(this, request, metadata, options, (err, res, metadataRes) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve({ response: res, metadata: metadataRes });
+        });
+      });
+    };
   }
 });`,
           `export const ${service.name}: ${typeName} = Service;`,
@@ -551,6 +576,7 @@ Object.keys(Service.prototype).forEach((key) => {
       } else {
         await fs.writeFile(servicePath, [
           fileTip,
+          `const grpc = require('@grpc/grpc-js');`,
           `const { get } = require('lodash');`,
           `const { promisify } = require('util');`,
           `const grpcObject = require('${getImportPath(servicePath, grpcObjPath)}');\n`,
@@ -562,11 +588,21 @@ Object.keys(Service.prototype).forEach((key) => {
           `
 const maxTry = 3;
 
+function toMetadata(metadata) {
+  const metadataIns = new grpc.Metadata();
+  if (metadata && typeof metadata === "object") {
+    Object.keys(metadata).forEach((keyName) => {
+      metadataIns.add(keyName, metadata[keyName]);
+    });
+  }
+  return metadataIns;
+}
+
 Object.keys(${service.name}.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
     const origin = ${service.name}.prototype[key];
     const methodId = origin.path.replace(/\\//g, '.').replace(/^\\./, '');
-    ${service.name}.prototype[key] = promisify(function(request, metadata, options, callback) {
+    const wrapper = function(request, metadata, options, callback) {
       let count = 0;
 
       if (typeof callback !== 'undefined') {
@@ -582,7 +618,7 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         }
 
         const start = Date.now();
-        origin.apply(self, [request, options, function(err, response, metadata) {
+        origin.apply(self, [request, toMetadata(metadata), options, function(err, response, metadata) {
           if (!logOptions.disable) {
             const duration = (Date.now() - start) / 1000;
             console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request));
@@ -603,7 +639,20 @@ Object.keys(${service.name}.prototype).forEach((key) => {
       }
 
       doCall(this);
-    });
+    };
+    ${service.name}.prototype[key] = promisify(wrapper);
+    ${service.name}.prototype[\`\$\{key\}V2\`] = function(option) {
+      const { request, metadata, options } = option;
+      return new Promise((resolve, reject) => {
+        wrapper.call(this, request, metadata, options, (err, res, metadataRes) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve({ response: res, metadata: metadataRes });
+        });
+      });
+    };
   }
 });`,
           `module.exports.${service.name} = ${service.name};\n`,
