@@ -466,7 +466,6 @@ grpc.Metadata.prototype.getMap = function() {
     request: ${requestType};
     metadata?: MetadataMap;
     options?: { timeout?: number; flags?: number; host?: string; };
-    callback?: (err: Error, response: ${responseType}, metadata: Metadata) => void;
   }): Promise<{ response:${responseType}, metadata: Metadata }>;
 `
         });
