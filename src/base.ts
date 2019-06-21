@@ -467,7 +467,7 @@ grpc.Metadata.prototype.getMap = function() {
     metadata?: MetadataMap;
     options?: { timeout?: number; flags?: number; host?: string; };
     callback?: (err: Error, response: ${responseType}, metadata: Metadata) => void;
-  }): Promise<${responseType}>;
+  }): Promise<{ response:${responseType}, error?: Error }>;
 `
         });
 
@@ -559,7 +559,7 @@ Object.keys(Service.prototype).forEach((key) => {
     Service.prototype[\`\$\{key\}V2\`] = function(option: ReqOptions) {
       const { request, metadata, options } = option;
       return new Promise((resolve, reject) => {
-        wrapper.call(this, request, metadata, options, (err, res, metadataRes) => {
+        wrapper.call(this, request, metadata, options, (err: Error | null, res: any, metadataRes: Metadata) => {
           if (err) {
             reject(err);
             return;
