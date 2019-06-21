@@ -453,14 +453,12 @@ grpc.Metadata.prototype.getMap = function() {
           const responseType = `types.${getTsType(method.responseType, packageName, config).tsType}`;
           return `  ${method.name}(
     request: ${requestType},
-    options?: { timeout?: number; flags?: number; host?: string; },
-    callback?: (err: Error, response: ${responseType}, metadata: Metadata) => void,
+    options?: { timeout?: number; flags?: number; host?: string; }
   ): Promise<${responseType}>;
   ${method.name}(
     request: ${requestType},
     metadata: MetadataMap,
-    options?: { timeout?: number; flags?: number; host?: string; },
-    callback?: (err: Error, response: ${responseType}, metadata: Metadata) => void,
+    options?: { timeout?: number; flags?: number; host?: string; }
   ): Promise<${responseType}>;
   ${method.name}V2(option: {
     request: ${requestType};
@@ -517,14 +515,22 @@ Object.keys(Service.prototype).forEach((key) => {
     const origin = Service.prototype[key];
     const methodId = origin.path.replace(/\\//g, '.').replace(/^\\./, '');
     const wrapper = function(this: any, request: any, metadata: MetadataMap, options: any, callback: any) {
-      let count = 0;
-
-      if (typeof callback !== 'undefined') {
-        options = Object.assign({}, callOptions, options) || {};
-      } else {
-        callback = options;
-        options = { ...callOptions };
+      switch (arguments.length) {
+        case 2:
+          callback = metadata;
+          metadata = {};
+          options = {};
+          break;
+        case 3:
+          callback = options;
+          options = metadata;
+          metadata = {};
+          break;
       }
+
+      options = Object.assign({}, callOptions, options);
+      
+      let count = 0;
 
       function doCall(self: any) {
         if (typeof options.timeout === 'number') {
@@ -602,14 +608,22 @@ Object.keys(${service.name}.prototype).forEach((key) => {
     const origin = ${service.name}.prototype[key];
     const methodId = origin.path.replace(/\\//g, '.').replace(/^\\./, '');
     const wrapper = function(request, metadata, options, callback) {
-      let count = 0;
-
-      if (typeof callback !== 'undefined') {
-        options = Object.assign({}, callOptions, options) || {};
-      } else {
-        callback = options;
-        options = { ...callOptions };
+      switch (arguments.length) {
+        case 2:
+          callback = metadata;
+          metadata = {};
+          options = {};
+          break;
+        case 3:
+          callback = options;
+          options = metadata;
+          metadata = {};
+          break;
       }
+
+      options = Object.assign({}, callOptions, options);
+      
+      let count = 0;
 
       function doCall(self) {
         if (typeof options.timeout === 'number') {
