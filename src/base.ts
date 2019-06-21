@@ -458,7 +458,7 @@ grpc.Metadata.prototype.getMap = function() {
   ): Promise<${responseType}>;
   ${method.name}(
     request: ${requestType},
-    metadata: Metadata,
+    metadata: { [key: string]: string | Buffer },
     options?: { timeout?: number; flags?: number; host?: string; },
     callback?: (err: Error, response: ${responseType}, metadata: Metadata) => void,
   ): Promise<${responseType}>;
@@ -470,6 +470,7 @@ grpc.Metadata.prototype.getMap = function() {
         await fs.writeFile(servicePath, [
           fileTip,
           `import { Metadata } from "@grpc/grpc-js";`,
+          `import * as grpc from '@grpc/grpc-js';`,
           `import { get } from 'lodash';`,
           `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,
           `import { ChannelCredentials } from "${grpcNative ? 'grpc' : `${grpcNpmName}/build/src/channel-credentials`}";`,
@@ -488,11 +489,23 @@ grpc.Metadata.prototype.getMap = function() {
           `
 const maxTry = 3;
 
+type MetadataMap = { [key: string]: string | Buffer };
+
+function toMetadata(metadata: MetadataMap): Metadata {
+  const metadataIns = new grpc.Metadata();
+  if (metadata && typeof metadata === "object") {
+    Object.keys(metadata).forEach((keyName) => {
+      metadataIns.add(keyName, metadata[keyName]);
+    });
+  }
+  return metadataIns;
+}
+
 Object.keys(Service.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
     const origin = Service.prototype[key];
     const methodId = origin.path.replace(/\\//g, '.').replace(/^\\./, '');
-    Service.prototype[key] = promisify(function(this: any, request: any, metadata: Metadata, options: any, callback: any) {
+    Service.prototype[key] = promisify(function(this: any, request: any, metadata: MetadataMap, options: any, callback: any) {
       let count = 0;
 
       if (typeof callback !== 'undefined') {
@@ -508,7 +521,7 @@ Object.keys(Service.prototype).forEach((key) => {
         }
 
         const start = Date.now();
-        (origin as any).apply(self, [request, metadata, options, function(err: any, response: any, metadataRes: Metadata) {
+        (origin as any).apply(self, [request, toMetadata(metadata), options, function(err: any, response: any, metadataRes: Metadata) {
           if (!logOptions.disable) {
             const duration = (Date.now() - start) / 1000;
             console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request));
