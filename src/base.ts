@@ -355,6 +355,7 @@ export interface ICase<Request, Response> {
       await fs.writeFile(grpcObjPath, [
         fileTip,
         `import * as grpc from '${grpcNpmName}';`,
+        `import { Status } from '@grpc/grpc-js/build/src/constants';`,
         `import * as fs from 'fs';`,
         `import { forOwn } from 'lodash';`,
         `import { loadFromJson } from 'load-proto';\n`,
@@ -391,6 +392,34 @@ grpc.Metadata.prototype.getMap = function() {
   }
   return result;
 }
+// add metadata for response
+grpc.Client.prototype.handleUnaryResponse = function (call, deserialize, callback) {
+  let responseMessage = null;
+  call.on('data', (data) => {
+    if (responseMessage != null) {
+      call.cancelWithStatus(Status.INTERNAL, 'Too many responses received');
+    }
+    try {
+      responseMessage = deserialize(data);
+    } catch (e) {
+      call.cancelWithStatus(Status.INTERNAL, 'Failed to parse server response');
+    }
+  });
+  call.on('end', () => {
+    if (responseMessage == null) {
+      call.cancelWithStatus(Status.INTERNAL, 'Not enough responses received');
+    }
+  });
+  call.on('status', (status) => {
+    // 增加返回参数metadata
+    if (status.code === Status.OK) {
+      callback(null, responseMessage, status.metadata);
+    } else {
+      const error = Object.assign(new Error(status.details), status);
+      callback(error, null, status.metadata);
+    }
+  });
+};
       `,
         `export default grpcObject;`,
       ].join('\n'));
@@ -541,9 +570,20 @@ Object.keys(Service.prototype).forEach((key) => {
         (origin as any).apply(self, [request, toMetadata(metadata), options, function(err: any, response: any, metadataRes: Metadata) {
           if (!logOptions.disable) {
             const duration = (Date.now() - start) / 1000;
-            console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request));
+            console.info(
+              'grpc invoke:', methodId,
+              'duration:', duration + 's',
+              'metadata:', JSON.stringify(metadata),
+              'request:', JSON.stringify(request),
+            );
             if (err) {
-              console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request), 'err:', err);
+              console.error(
+                'grpc invoke:', methodId,
+                'duration:', duration + 's',
+                'metadata:', JSON.stringify(metadata),
+                'request:', JSON.stringify(request),
+                'err:', err,
+              );
             }
           }
 
@@ -634,9 +674,20 @@ Object.keys(${service.name}.prototype).forEach((key) => {
         origin.apply(self, [request, toMetadata(metadata), options, function(err, response, metadata) {
           if (!logOptions.disable) {
             const duration = (Date.now() - start) / 1000;
-            console.info('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request));
+            console.info(
+              'grpc invoke:', methodId,
+              'duration:', duration + 's',
+              'metadata:', JSON.stringify(metadata),
+              'request:', JSON.stringify(request),
+            );
             if (err) {
-              console.error('grpc invoke:', methodId, 'duration:', duration + 's', 'request:', JSON.stringify(request), 'err:', err);
+              console.error(
+                'grpc invoke:', methodId,
+                'duration:', duration + 's',
+                'metadata:', JSON.stringify(metadata),
+                'request:', JSON.stringify(request),
+                'err:', err,
+              );
             }
           }
 
