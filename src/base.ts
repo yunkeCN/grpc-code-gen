@@ -534,7 +534,7 @@ function toMetadata(metadata: MetadataMap): Metadata {
   const metadataIns = new grpc.Metadata();
   if (metadata && typeof metadata === "object") {
     Object.keys(metadata).forEach((keyName) => {
-      metadataIns.add(keyName, metadata[keyName]);
+      metadataIns.add(keyName, metadata[keyName] as string);
     });
   }
   return metadataIns;
