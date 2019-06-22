@@ -522,7 +522,7 @@ grpc.Metadata.prototype.getMap = function() {
           `
 const maxTry = 3;
 
-type MetadataMap = { [key: string]: string | Buffer };
+type MetadataMap = { [key: string]: string | number | Buffer };
 
 interface ReqOptions {
   request: any;
