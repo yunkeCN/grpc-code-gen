@@ -484,6 +484,7 @@ grpc.Metadata.prototype.getMap = function() {
     request: ${requestType},
     options?: { timeout?: number; flags?: number; host?: string; }
   ): Promise<${responseType}>;
+  /** @deprecated 请使用V2版本 */
   ${method.name}(
     request: ${requestType},
     metadata: MetadataMap,
