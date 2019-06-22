@@ -28,6 +28,7 @@ base.gen({
     }
     return null;
   },
+  configFilePath: '',
   // target: 'javascript',
 })
   .catch((err) => {

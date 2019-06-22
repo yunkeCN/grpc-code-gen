@@ -29,19 +29,21 @@ const {
 
 const opt: any = {};
 
-let configFilePath = undefined;
-if (fs.existsSync(config)) {
-  if (path.isAbsolute(config)) {
-    configFilePath = config;
-    Object.assign(opt, require(config));
-  } else {
-    configFilePath = path.join(process.cwd(), config);
-    Object.assign(opt, require(configFile));
-  }
+if (!config) {
+  console.error('Must set config file: grpc-code-gen.config.js');
+  process.exit(1);
 }
 
-if (!configFilePath) {
-  console.error('Must set config file: grpc-code-gen.config.js');
+let configFilePath = undefined;
+if (path.isAbsolute(config)) {
+  configFilePath = config;
+} else {
+  configFilePath = path.join(process.cwd(), config);
+}
+if (fs.existsSync(configFilePath)) {
+  Object.assign(opt, require(configFilePath));
+} else {
+  console.error(`Config file not exits: ${configFilePath}`);
   process.exit(1);
 }
 

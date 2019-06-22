@@ -249,7 +249,7 @@ export interface Options extends IOption {
   target?: 'javascript' | 'typescript';
   jsonSemanticTypes?: boolean;
   serviceCode?: boolean;
-  configFilePath: string;
+  configFilePath?: string;
   grpcNpmName?: string;
 }
 
@@ -351,6 +351,7 @@ export interface ICase<Request, Response> {
 
   if (serviceCode) {
     const grpcObjPath = getAbsPath(`grpcObj.${moduleSuffix}`, baseDir);
+    const grpcClientPath = getAbsPath(`getGrpcClient.${moduleSuffix}`, baseDir);
     if (typescript) {
       await fs.writeFile(grpcObjPath, [
         fileTip,
@@ -361,8 +362,8 @@ export interface ICase<Request, Response> {
         `import { loadFromJson } from 'load-proto';\n`,
         `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
         `let config;`,
-        `if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath)}'))) {
-  config = require('${getImportPath(grpcObjPath, configFilePath)}');
+        `if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath as string)}'))) {
+  config = require('${getImportPath(grpcObjPath, configFilePath as string)}');
 }`,
         `const grpcObject = grpc.loadPackageDefinition(loadFromJson(`,
         `  root,`,
@@ -423,6 +424,79 @@ grpc.Metadata.prototype.getMap = function() {
       `,
         `export default grpcObject;`,
       ].join('\n'));
+
+      const grpcCodeGenPath = path.join(process.cwd(), '.grpc-code-gen');
+      await fs.writeFile(grpcClientPath, [
+        fileTip,
+        `
+import * as grpc from "@grpc/grpc-js/";
+import { ChannelCredentials } from "@grpc/grpc-js//build/src/channel-credentials";
+import * as fs from 'fs';
+import * as path from 'path';
+
+export interface IService<S> {
+  $FILE_NAME: string;
+
+  new(address: string, credentials: ChannelCredentials, options?: object): S;
+}
+
+let grpcServiceConfig: {
+  [key: string]: {
+    server_name: string;
+    server_port: number;
+    cert_pem_path: string | undefined;
+  }
+};
+
+const globalConfigPath = path.resolve(__dirname, '${getImportPath(grpcClientPath, path.join(grpcCodeGenPath, 'config.json'))}');
+if (!fs.existsSync(globalConfigPath)) {
+  console.error('Please run: "yarn grpc-gen" first');
+  process.exit(-1);
+}
+
+const grpcServiceConfigPath = path.resolve(__dirname, '${getImportPath(grpcClientPath, path.join(process.cwd(), 'grpc-service.config.js'))}.js');
+grpcServiceConfig = require(globalConfigPath);
+
+let grpcServiceConfigLocal: any = {};
+const serviceConfigFileExist = fs.existsSync(grpcServiceConfigPath);
+if (serviceConfigFileExist) {
+  grpcServiceConfigLocal = require(grpcServiceConfigPath);
+  console.info('---------------------------');
+  console.info('Use local service config: ');
+  console.info(JSON.stringify(grpcServiceConfigLocal, (key, value) => value, 2));
+  console.info('---------------------------');
+}
+
+export default function getGrpcClient<S>(service: IService<S>): S {
+  const exec = /\\/([^/]+)-proto\\//.exec(service.$FILE_NAME);
+
+  if (exec) {
+    const serverName = exec[1];
+    const configLocal = grpcServiceConfigLocal[serverName];
+    if (serviceConfigFileExist && !configLocal) {
+      console.warn(\`Service: \$\{serverName\} not setting local, use global config, please ensure have set hosts\`)
+    }
+    const config = configLocal || grpcServiceConfig[serverName];
+    if (config) {
+      let credentials;
+      if (config.cert_pem_path) {
+        credentials = grpc.credentials.createSsl(
+          fs.readFileSync(path.join(__dirname, '${getImportPath(grpcClientPath, path.join(grpcCodeGenPath, 'ca.pem'))}')),
+        );
+      } else {
+        credentials = grpc.credentials.createInsecure();
+      }
+      return new service(\`\$\{config.server_name\}:\$\{config.server_port\}\`, credentials, {
+        'grpc.ssl_target_name_override': serverName,
+        'grpc.keepalive_time_ms': 3000,
+        'grpc.keepalive_timeout_ms': 2000,
+      });
+    }
+  }
+  throw new Error(\`\$\{service.$FILE_NAME\} config not exists!\`);
+}
+`,
+      ].join('\n'));
     } else {
       await fs.writeFile(grpcObjPath, [
         fileTip,
@@ -480,11 +554,12 @@ grpc.Metadata.prototype.getMap = function() {
         .map((method) => {
           const requestType = 'types.' + getTsType(method.requestType, packageName, config).tsType;
           const responseType = `types.${getTsType(method.responseType, packageName, config).tsType}`;
-          return `  ${method.name}(
+          return `  /** @deprecated 请使用: ${method.name}V2 */
+  ${method.name}(
     request: ${requestType},
     options?: { timeout?: number; flags?: number; host?: string; }
   ): Promise<${responseType}>;
-  /** @deprecated 请使用V2版本 */
+  /** @deprecated 请使用: ${method.name}V2 */
   ${method.name}(
     request: ${requestType},
     metadata: MetadataMap,
@@ -509,7 +584,8 @@ grpc.Metadata.prototype.getMap = function() {
           `import { ChannelCredentials } from "${grpcNative ? 'grpc' : `${grpcNpmName}/build/src/channel-credentials`}";`,
           `import { promisify } from 'util';`,
           `import * as types from '${getImportPath(servicePath, typesPath)}';\n`,
-          `const config = require('${getImportPath(servicePath, configFilePath)}');\n`,
+          `import getGrpcClient from '${getImportPath(servicePath, grpcClientPath)}';\n`,
+          `const config = require('${getImportPath(servicePath, configFilePath as string)}');\n`,
           `const logOptions = config.logOptions ? { ...config.logOptions } : { enable: true, attributes: ['request'] } \n`,
           `const callOptions = config.callOptions ? { ...config.callOptions } : {} \n`,
           `export interface ${typeName} {`,
@@ -617,7 +693,8 @@ Object.keys(Service.prototype).forEach((key) => {
   }
 });`,
           `export const ${service.name}: ${typeName} = Service;`,
-          `export default ${service.name};\n`,
+          `export default ${service.name};`,
+          `export const ${service.name[0].toLowerCase()}${service.name.slice(1)} = getGrpcClient<${typeName}>(${service.name});\n`,
         ].join('\n'));
       } else {
         await fs.writeFile(servicePath, [
@@ -626,7 +703,7 @@ Object.keys(Service.prototype).forEach((key) => {
           `const { get } = require('lodash');`,
           `const { promisify } = require('util');`,
           `const grpcObject = require('${getImportPath(servicePath, grpcObjPath)}');\n`,
-          `const config = require('${getImportPath(servicePath, configFilePath)}');\n`,
+          `const config = require('${getImportPath(servicePath, configFilePath as string)}');\n`,
           `const logOptions = config.logOptions ? { ...config.logOptions } : { disable: false, attributes: ['request'] } \n`,
           `const callOptions = config.callOptions ? { ...config.callOptions } : {} \n`,
           `const ${service.name} = get(grpcObject, '${service.fullName}');`,
