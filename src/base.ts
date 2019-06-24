@@ -618,7 +618,7 @@ type MetadataMap = { [key: string]: string | number | Buffer };
 
 interface ReqOptions {
   request: any;
-  metadata?: Metadata;
+  metadata?: MetadataMap;
   options: any;
 }
 
