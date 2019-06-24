@@ -505,12 +505,8 @@ export default function getGrpcClient<S>(service: IService<S>): S {
       } else {
         options = Object.assign(defaultOptions, clientOptions);
       }
-      
-      return new service(\`\$\{config.server_name\}:\$\{config.server_port\}\`, credentials, {
-        'grpc.ssl_target_name_override': serverName,
-        'grpc.keepalive_time_ms': 3000,
-        'grpc.keepalive_timeout_ms': 2000,
-      });
+
+      return new service(\`\$\{config.server_name\}:\$\{config.server_port\}\`, credentials, options);
     }
   }
   throw new Error(\`\$\{service.$FILE_NAME\} config not exists!\`);
