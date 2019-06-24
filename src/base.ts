@@ -636,7 +636,7 @@ Object.keys(Service.prototype).forEach((key) => {
   if (!/^\\$/.test(key)) {
     const origin = Service.prototype[key];
     const methodId = origin.path.replace(/\\//g, '.').replace(/^\\./, '');
-    const wrapper = function(this: any, request: any, metadata: MetadataMap, options: any, callback: any) {
+    const wrapper = function(this: any, request: any, metadata: any, options: any, callback: any) {
       switch (arguments.length) {
         case 2:
           callback = metadata;
