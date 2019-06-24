@@ -448,6 +448,8 @@ let grpcServiceConfig: {
   }
 };
 
+const codeGenConfig = require('${getImportPath(grpcClientPath, path.join(process.cwd(), 'grpc-code-gen.config.js'))}');
+
 const globalConfigPath = path.resolve(__dirname, '${getImportPath(grpcClientPath, path.join(grpcCodeGenPath, 'config.json'))}');
 if (!fs.existsSync(globalConfigPath)) {
   console.error('Please run: "yarn grpc-gen" first');
@@ -486,6 +488,24 @@ export default function getGrpcClient<S>(service: IService<S>): S {
       } else {
         credentials = grpc.credentials.createInsecure();
       }
+      
+      let options;
+      const {
+        clientOptions = {},
+      } = codeGenConfig;
+
+      const defaultOptions = {
+        'grpc.ssl_target_name_override': serverName,
+        'grpc.keepalive_time_ms': 3000,
+        'grpc.keepalive_timeout_ms': 2000,
+      };
+
+      if (typeof clientOptions === 'function') {
+        options = clientOptions(defaultOptions);
+      } else {
+        options = Object.assign(defaultOptions, clientOptions);
+      }
+      
       return new service(\`\$\{config.server_name\}:\$\{config.server_port\}\`, credentials, {
         'grpc.ssl_target_name_override': serverName,
         'grpc.keepalive_time_ms': 3000,
