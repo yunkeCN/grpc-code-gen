@@ -601,6 +601,14 @@ export default function getGrpcClient<S>(service: IService<S>): S {
           `import { promisify } from 'util';`,
           `import * as types from '${getImportPath(servicePath, typesPath)}';\n`,
           `import getGrpcClient from '${getImportPath(servicePath, grpcClientPath)}';\n`,
+          `
+type MetadataMap = { [key: string]: string | number | Buffer };
+
+interface ReqOptions {
+  request: any;
+  metadata?: MetadataMap;
+  options: any;
+}\n`,
           `const config = require('${getImportPath(servicePath, configFilePath as string)}');\n`,
           `const logOptions = config.logOptions ? { ...config.logOptions } : { enable: true, attributes: ['request'] } \n`,
           `const callOptions = config.callOptions ? { ...config.callOptions } : {} \n`,
@@ -613,14 +621,6 @@ export default function getGrpcClient<S>(service: IService<S>): S {
           `Service.$FILE_NAME = '${service.filename && service.filename.replace(/\\/g, '/')}';`,
           `
 const maxTry = 3;
-
-type MetadataMap = { [key: string]: string | number | Buffer };
-
-interface ReqOptions {
-  request: any;
-  metadata?: MetadataMap;
-  options: any;
-}
 
 function toMetadata(metadata: MetadataMap): Metadata {
   const metadataIns = new grpc.Metadata();
