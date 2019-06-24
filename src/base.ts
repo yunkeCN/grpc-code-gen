@@ -430,7 +430,7 @@ grpc.Metadata.prototype.getMap = function() {
         fileTip,
         `
 import * as grpc from '${grpcNpmName}';
-import { ChannelCredentials } from "${grpcNpmName}/build/src/channel-credentials";
+import { ChannelCredentials } from "${grpcNative ? 'grpc' : `${grpcNpmName}/build/src/channel-credentials`}";
 import * as fs from 'fs';
 import * as path from 'path';
 
