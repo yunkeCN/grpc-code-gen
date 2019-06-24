@@ -356,7 +356,7 @@ export interface ICase<Request, Response> {
       await fs.writeFile(grpcObjPath, [
         fileTip,
         `import * as grpc from '${grpcNpmName}';`,
-        `import { Status } from '@grpc/grpc-js/build/src/constants';`,
+        `import { Status } from '${grpcNpmName}/build/src/constants';`,
         `import * as fs from 'fs';`,
         `import { forOwn } from 'lodash';`,
         `import { loadFromJson } from 'load-proto';\n`,
@@ -429,8 +429,8 @@ grpc.Metadata.prototype.getMap = function() {
       await fs.writeFile(grpcClientPath, [
         fileTip,
         `
-import * as grpc from "@grpc/grpc-js/";
-import { ChannelCredentials } from "@grpc/grpc-js//build/src/channel-credentials";
+import * as grpc from '${grpcNpmName}';
+import { ChannelCredentials } from "${grpcNpmName}/build/src/channel-credentials";
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -593,8 +593,8 @@ export default function getGrpcClient<S>(service: IService<S>): S {
         const typeName = 'I' + service.name;
         await fs.writeFile(servicePath, [
           fileTip,
-          `import { Metadata } from "@grpc/grpc-js";`,
-          `import * as grpc from '@grpc/grpc-js';`,
+          `import { Metadata } from "${grpcNpmName}";`,
+          `import * as grpc from '${grpcNpmName}';`,
           `import { get } from 'lodash';`,
           `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,
           `import { ChannelCredentials } from "${grpcNative ? 'grpc' : `${grpcNpmName}/build/src/channel-credentials`}";`,
@@ -715,7 +715,7 @@ Object.keys(Service.prototype).forEach((key) => {
       } else {
         await fs.writeFile(servicePath, [
           fileTip,
-          `const grpc = require('@grpc/grpc-js');`,
+          `const grpc = require('${grpcNpmName}');`,
           `const { get } = require('lodash');`,
           `const { promisify } = require('util');`,
           `const grpcObject = require('${getImportPath(servicePath, grpcObjPath)}');\n`,
