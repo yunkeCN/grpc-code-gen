@@ -190,11 +190,9 @@ export default async function genServices(opt: {
     await fs.writeFile(servicePath, [
       fileTip,
       `import { Metadata } from "${grpcNpmName}";`,
-      `import * as grpc from '${grpcNpmName}';`,
       `import { get } from 'lodash';`,
       `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,
       `import { ChannelCredentials } from "${grpcNative ? 'grpc' : `${grpcNpmName}/build/src/channel-credentials`}";`,
-      `import { promisify } from 'util';`,
       `import * as types from '${getImportPath(servicePath, typesPath)}';\n`,
       `import getGrpcClient from '${getImportPath(servicePath, grpcClientPath)}';\n`,
       `import serviceWrapper, { MetadataMap } from '${getImportPath(servicePath, serviceWrapperPath)}';\n`,
