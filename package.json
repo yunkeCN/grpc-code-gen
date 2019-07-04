@@ -25,6 +25,7 @@
     "lodash": "^4.17.11"
   },
   "devDependencies": {
+    "@grpc/grpc-js": "^0.5.0",
     "@types/cross-spawn": "^6.0.0",
     "@types/fs-extra": "^5.0.4",
     "@types/lodash": "^4.14.116",

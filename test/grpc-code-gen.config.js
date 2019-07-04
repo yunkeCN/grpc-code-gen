@@ -10,7 +10,6 @@ module.exports = {
   branch: 'test',
   accessToken: process.env.token,
   baseDir: `${__dirname}/code-gen-cli`,
-  serviceCode: true,
   jsonSemanticTypes: true,
   resolvePath: (origin, target, rootDir) => {
     if (/^git\.myscrm\.cn\/golang\/common\/proto\/(google|common)\//.test(target)) {

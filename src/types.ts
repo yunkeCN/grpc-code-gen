@@ -67,3 +67,9 @@ export interface TService extends TBase {
 
   filename: string | null;
 }
+
+export interface TNamespace {
+  messages?: { [name: string]: TMessage };
+  enums?: { [name: string]: TEnum };
+  nested?: { [name: string]: TNamespace };
+}
