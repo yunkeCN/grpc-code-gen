@@ -3,7 +3,6 @@ import { fileTip, getImportPath } from "./utils";
 
 export default function genGetGrpcClient(grpcNpmName: string, grpcClientPath: string): string {
   const grpcNative = grpcNpmName === 'grpc';
-  const grpcCodeGenPath = path.join(process.cwd(), '.grpc-code-gen');
   return `${fileTip}
 import * as grpc from '${grpcNpmName}';
 import { ChannelCredentials } from "${grpcNative ? 'grpc' : `${grpcNpmName}/build/src/channel-credentials`}";
@@ -30,7 +29,7 @@ if (typeof getServiceConfig !== 'function') {
 
 const grpcServiceConfigPath = path.resolve(__dirname, '${getImportPath(grpcClientPath, path.join(process.cwd(), 'grpc-service.config.js'))}.js');
 
-let grpcServiceConfigLocal: { [serviceName: string]: { host: string; port: number; cert_pem_path?: string } } = {};
+let grpcServiceConfigLocal: { [serviceName: string]: { host: string; port: number; cert_pem_content?: string } } = {};
 const serviceConfigFileExist = fs.existsSync(grpcServiceConfigPath);
 if (serviceConfigFileExist) {
   grpcServiceConfigLocal = require(grpcServiceConfigPath);
@@ -50,10 +49,8 @@ export default function getGrpcClient<S>(service: IService<S>): S {
 
     if (serviceConfig) {
       let credentials;
-      if (serviceConfig.cert_pem_path) {
-        credentials = grpc.credentials.createSsl(
-          fs.readFileSync(path.join(__dirname, '${getImportPath(grpcClientPath, path.join(grpcCodeGenPath, 'ca.pem'))}')),
-        );
+      if (serviceConfig.cert_pem_content) {
+        credentials = grpc.credentials.createSsl(Buffer.from(serviceConfig.cert_pem_content));
       } else {
         credentials = grpc.credentials.createInsecure();
       }
