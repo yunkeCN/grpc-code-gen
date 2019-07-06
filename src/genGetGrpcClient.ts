@@ -16,26 +16,21 @@ export interface IService<S> {
   new(address: string, credentials: ChannelCredentials, options?: object): S;
 }
 
-let grpcServiceConfig: {
-  [key: string]: {
-    server_name: string;
-    server_port: number;
-    cert_pem_path: string | undefined;
-  }
-};
-
 const codeGenConfig = require('${getImportPath(grpcClientPath, path.join(process.cwd(), 'grpc-code-gen.config.js'))}');
 
-const globalConfigPath = path.resolve(__dirname, '${getImportPath(grpcClientPath, path.join(grpcCodeGenPath, 'config.json'))}');
-if (!fs.existsSync(globalConfigPath)) {
-  console.error('Please run: "yarn grpc-gen" first');
+const {
+  clientOptions = {},
+  getServiceConfig,
+} = codeGenConfig;
+
+if (typeof getServiceConfig !== 'function') {
+  console.error('请在配置文件grpc-code-gen.config.js中设置属性: getServiceConfig');
   process.exit(-1);
 }
 
 const grpcServiceConfigPath = path.resolve(__dirname, '${getImportPath(grpcClientPath, path.join(process.cwd(), 'grpc-service.config.js'))}.js');
-grpcServiceConfig = require(globalConfigPath);
 
-let grpcServiceConfigLocal: any = {};
+let grpcServiceConfigLocal: { [serviceName: string]: { host: string; port: number; cert_pem_path?: string } } = {};
 const serviceConfigFileExist = fs.existsSync(grpcServiceConfigPath);
 if (serviceConfigFileExist) {
   grpcServiceConfigLocal = require(grpcServiceConfigPath);
@@ -50,14 +45,12 @@ export default function getGrpcClient<S>(service: IService<S>): S {
 
   if (exec) {
     const serverName = exec[1];
-    const configLocal = grpcServiceConfigLocal[serverName];
-    if (serviceConfigFileExist && !configLocal) {
-      console.warn(\`Service: \$\{serverName\} not setting local, use global config, please ensure have set hosts\`)
-    }
-    const config = configLocal || grpcServiceConfig[serverName];
-    if (config) {
+
+    const serviceConfig = getServiceConfig(serverName, grpcServiceConfigLocal);
+
+    if (serviceConfig) {
       let credentials;
-      if (config.cert_pem_path) {
+      if (serviceConfig.cert_pem_path) {
         credentials = grpc.credentials.createSsl(
           fs.readFileSync(path.join(__dirname, '${getImportPath(grpcClientPath, path.join(grpcCodeGenPath, 'ca.pem'))}')),
         );
@@ -65,24 +58,20 @@ export default function getGrpcClient<S>(service: IService<S>): S {
         credentials = grpc.credentials.createInsecure();
       }
       
-      let options;
-      const {
-        clientOptions = {},
-      } = codeGenConfig;
-
       const defaultOptions = {
         'grpc.ssl_target_name_override': serverName,
         'grpc.keepalive_time_ms': 3000,
         'grpc.keepalive_timeout_ms': 2000,
       };
 
+      let options;
       if (typeof clientOptions === 'function') {
         options = clientOptions(defaultOptions);
       } else {
         options = Object.assign(defaultOptions, clientOptions);
       }
 
-      return new service(\`\$\{config.server_name\}:\$\{config.server_port\}\`, credentials, options);
+      return new service(\`\$\{serviceConfig.host\}:\$\{serviceConfig.port\}\`, credentials, options);
     }
   }
   throw new Error(\`\$\{service.$FILE_NAME\} config not exists!\`);

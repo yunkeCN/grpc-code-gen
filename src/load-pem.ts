@@ -9,7 +9,7 @@ program
   .option(
     '-u, --url [url]',
     'Url of git repository',
-    'git@git.myscrm.cn:service-config/dev.git',
+    'git@git.myscrm.cn:service-config/global-conf.git',
   )
   .option(
     '-b, --branch [branch]',
@@ -40,8 +40,8 @@ load({
       fs.mkdirSync(dir);
     }
 
-    const target = `${dir}/ca.pem`;
-    fs.copyFileSync(`${res.path}/ca.pem`, target);
+    const target = `${dir}/certs/ca.pem`;
+    fs.copyFileSync(`${res.path}/certs/ca.pem`, target);
     console.info(`Generate success in ${target}`);
   })
   .catch((err) => {
