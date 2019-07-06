@@ -1,6 +1,6 @@
 {
   "name": "grpc-code-gen",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "license": "MIT",
   "repository": "https://github.com/yunkeCN/grpc-code-gen.git",
   "bin": {
