@@ -8,7 +8,7 @@ import {
   getImportPath,
   getPackageName,
   PROTO_TYPE_2_JSON_SEMANTIC_MAP,
-  PROTO_TYPE_2_TS_TYPE_MAP
+  PROTO_TYPE_2_TS_TYPE_MAP, tslintDisable
 } from "./utils";
 
 interface TNamespace {
@@ -189,6 +189,7 @@ export default async function genServices(opt: {
     const typeName = 'I' + service.name;
     await fs.writeFile(servicePath, [
       fileTip,
+      tslintDisable,
       `import { Metadata } from "${grpcNpmName}";`,
       `import { get } from 'lodash';`,
       `import grpcObject from '${getImportPath(servicePath, grpcObjPath)}';\n`,

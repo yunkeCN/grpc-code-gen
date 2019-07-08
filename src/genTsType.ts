@@ -1,6 +1,6 @@
 import { Root } from 'protobufjs';
 import { TEnum, TMessage, TNamespace } from "./types";
-import { fileTip, PROTO_TYPE_2_JSON_SEMANTIC_MAP, PROTO_TYPE_2_TS_TYPE_MAP } from "./utils";
+import { fileTip, PROTO_TYPE_2_JSON_SEMANTIC_MAP, PROTO_TYPE_2_TS_TYPE_MAP, tslintDisable } from "./utils";
 
 function genSpace(num: number) {
   let space = '';
@@ -199,6 +199,7 @@ export default function genTsType(opt: {
 
   return [
     fileTip,
+    tslintDisable,
     doGenTsType(namespace, { root, messageMap, enumMap }),
   ].join('\n');
 }

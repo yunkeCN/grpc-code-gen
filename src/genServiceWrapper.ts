@@ -1,4 +1,4 @@
-import { fileTip, getImportPath } from "./utils";
+import { fileTip, getImportPath, tslintDisable } from "./utils";
 
 export default function genServiceWrapper(opt: {
   grpcNpmName: string;
@@ -7,6 +7,7 @@ export default function genServiceWrapper(opt: {
 }): string {
   const { grpcNpmName, configFilePath, serviceWrapperPath } = opt;
   return `${fileTip}
+${tslintDisable}
 import * as grpc from '${grpcNpmName}';
 import { Metadata } from "${grpcNpmName}";
 import { promisify } from "util";

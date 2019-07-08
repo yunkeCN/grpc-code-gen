@@ -1,4 +1,4 @@
-import { fileTip, getImportPath } from "./utils";
+import { fileTip, getImportPath, tslintDisable } from "./utils";
 
 export default function genGrpcObj(opt:{
   grpcNpmName: string;
@@ -9,6 +9,7 @@ export default function genGrpcObj(opt:{
   const { grpcNpmName, grpcObjPath, jsonPath, configFilePath } = opt;
   return [
     fileTip,
+    tslintDisable,
     `import * as grpc from '${grpcNpmName}';`,
     `import { Status } from '${grpcNpmName}/build/src/constants';`,
     `import * as fs from 'fs';`,

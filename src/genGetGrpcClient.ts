@@ -1,9 +1,10 @@
 import * as path from "path";
-import { fileTip, getImportPath } from "./utils";
+import { fileTip, getImportPath, tslintDisable } from "./utils";
 
 export default function genGetGrpcClient(grpcNpmName: string, grpcClientPath: string): string {
   const grpcNative = grpcNpmName === 'grpc';
   return `${fileTip}
+${tslintDisable}
 import * as grpc from '${grpcNpmName}';
 import { ChannelCredentials } from "${grpcNative ? 'grpc' : `${grpcNpmName}/build/src/channel-credentials`}";
 import * as fs from 'fs';
