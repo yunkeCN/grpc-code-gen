@@ -101,7 +101,7 @@ export default function serviceWrapper<Type>(Service: Type): Type {
       };
       (Service as any).prototype[key] = promisify(wrapper);
       (Service as any).prototype[\`\$\{key\}V2\`] = function(option: ReqOptions) {
-        const { request, metadata, options } = option;
+        const { request, metadata = {}, options } = option;
         return new Promise((resolve, reject) => {
           wrapper.call(this, request, metadata, options, (err: Error | null, res: any, metadataRes: Metadata) => {
             if (err) {
