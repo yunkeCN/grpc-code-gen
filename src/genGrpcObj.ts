@@ -15,7 +15,7 @@ export default function genGrpcObj(opt: {
     `import * as fs from 'fs';`,
     `import { forOwn } from 'lodash';`,
     `import { loadFromJson } from 'load-proto';\n`,
-    isNative ? `` : `import { Status } from '${grpcNpmName}/build/src/constants';`,
+    isNative ? `import { EventEmitter } from "events";` : `import { Status } from '${grpcNpmName}/build/src/constants';`,
     `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
     `let config;`,
     `if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath as string)}'))) {
