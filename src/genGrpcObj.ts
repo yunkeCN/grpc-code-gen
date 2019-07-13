@@ -1,20 +1,21 @@
 import { fileTip, getImportPath, tslintDisable } from "./utils";
 
-export default function genGrpcObj(opt:{
+export default function genGrpcObj(opt: {
   grpcNpmName: string;
   grpcObjPath: string;
   jsonPath: string;
   configFilePath: string;
 }): string {
   const { grpcNpmName, grpcObjPath, jsonPath, configFilePath } = opt;
+  const isNative = grpcNpmName === 'grpc';
   return [
     fileTip,
     tslintDisable,
     `import * as grpc from '${grpcNpmName}';`,
-    grpcNpmName === 'grpc' ? `const { Status } = require('${grpcNpmName}/src/constants');` : `import { Status } from '${grpcNpmName}/build/src/constants';`,
     `import * as fs from 'fs';`,
     `import { forOwn } from 'lodash';`,
     `import { loadFromJson } from 'load-proto';\n`,
+    isNative ? `` : `import { Status } from '${grpcNpmName}/build/src/constants';`,
     `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
     `let config;`,
     `if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath as string)}'))) {
@@ -27,7 +28,7 @@ export default function genGrpcObj(opt:{
     `// fix: grpc-message header split by comma
 grpc.Metadata.prototype.getMap = function() {
   const result: any = {};
-  const collection = (this as any).internalRepr;
+  const collection = (this as any).internalRepr || (this as any)._internal_repr;
   if (collection.forEach) {
     collection.forEach((values: any, key: string) => {
       if (values.length > 0) {
@@ -48,7 +49,57 @@ grpc.Metadata.prototype.getMap = function() {
   }
   return result;
 };
+`,
+    isNative ?
+      `
+const clientInterceptors = require('grpc/src/client_interceptors');
+const common = require('grpc/src/common');
 
+const getLastListener = clientInterceptors.getLastListener;
+
+function _getUnaryListener(method_definition: any, emitter: any, callback: any) {
+  var resultMessage: any;
+  return {
+    onReceiveMetadata: function(metadata: any) {
+      emitter.emit('metadata', metadata);
+    },
+    onReceiveMessage: function(message: any) {
+      resultMessage = message;
+    },
+    onReceiveStatus: function(status: any) {
+      if (status.code !== grpc.status.OK) {
+        var error = common.createStatusError(status);
+        callback(error);
+      } else {
+        callback(null, resultMessage, status.metadata);
+      }
+      emitter.emit('status', status);
+    }
+  };
+}
+
+clientInterceptors.getLastListener = function (method_definition: any, emitter: any, callback: any) {
+  var method_type = common.getMethodType(method_definition);
+  if (method_type !== 0) {
+    return getLastListener(method_definition, emitter, callback);
+  }
+
+  if (emitter instanceof Function) {
+    callback = emitter;
+    callback = function() {};
+  }
+  if (!(callback instanceof Function)) {
+    callback = function() {};
+  }
+  if (!((emitter instanceof EventEmitter) &&
+    (callback instanceof Function))) {
+    throw new Error('Argument mismatch in getLastListener');
+  }
+
+  return _getUnaryListener(method_definition, emitter, callback);
+}`
+      :
+      `
 (grpc.Client.prototype as any).handleUnaryResponse = function(call: any, deserialize: any, callback: any) {
   let responseMessage:any = null;
   call.on('data', (data: any) => {
@@ -75,8 +126,7 @@ grpc.Metadata.prototype.getMap = function() {
       callback(error, null, status.metadata);
     }
   });
-};
-      `,
+};`,
     `export default grpcObject;`,
   ].join('\n')
 }
