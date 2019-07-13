@@ -11,7 +11,7 @@ export default function genGrpcObj(opt:{
     fileTip,
     tslintDisable,
     `import * as grpc from '${grpcNpmName}';`,
-    `import { Status } from '${grpcNpmName}/build/src/constants';`,
+    grpcNpmName === 'grpc' ? `const { Status } = require('${grpcNpmName}/src/constants');` : `import { Status } from '${grpcNpmName}/build/src/constants';`,
     `import * as fs from 'fs';`,
     `import { forOwn } from 'lodash';`,
     `import { loadFromJson } from 'load-proto';\n`,

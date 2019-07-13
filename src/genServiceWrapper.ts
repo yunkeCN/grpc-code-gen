@@ -26,7 +26,7 @@ function toMetadata(metadata: MetadataMap): Metadata {
   const metadataIns = new grpc.Metadata();
   if (metadata && typeof metadata === "object") {
     Object.keys(metadata).forEach((keyName) => {
-      metadataIns.add(keyName, metadata[keyName] as string);
+      metadataIns.add(keyName, '' + metadata[keyName]);
     });
   }
   return metadataIns;
