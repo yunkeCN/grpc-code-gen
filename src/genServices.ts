@@ -8,7 +8,8 @@ import {
   getImportPath,
   getPackageName,
   PROTO_TYPE_2_JSON_SEMANTIC_MAP,
-  PROTO_TYPE_2_TS_TYPE_MAP, tslintDisable
+  PROTO_TYPE_2_TS_TYPE_MAP,
+  tslintDisable
 } from "./utils";
 
 interface TNamespace {
@@ -178,7 +179,7 @@ export default async function genServices(opt: {
     metadata: MetadataMap,
     options?: { timeout?: number; flags?: number; host?: string; }
   ): Promise<${responseType}>;
-  /** ${method.comment} */
+  ${method.comment ? `/** ${method.comment} */` : ''}
   ${method.name}V2(option: {
     request: ${requestType};
     metadata?: MetadataMap;
