@@ -29,7 +29,7 @@ export async function gen(opt: Options): Promise<string> {
     branch,
     accessToken,
     resolvePath,
-    grpcNpmName = '@grpc/grpc-js',
+    grpcNpmName = 'grpc',
   } = opt;
 
   fs.removeSync(baseDir);
