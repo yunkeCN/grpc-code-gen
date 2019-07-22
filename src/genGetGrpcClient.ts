@@ -58,8 +58,6 @@ export default function getGrpcClient<S>(service: IService<S>): S {
       
       const defaultOptions = {
         'grpc.ssl_target_name_override': serverName,
-        'grpc.keepalive_time_ms': 3000,
-        'grpc.keepalive_timeout_ms': 2000,
       };
 
       let options;
