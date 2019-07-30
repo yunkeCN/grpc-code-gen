@@ -514,6 +514,15 @@ fs-extra@^7.0.0:
     jsonfile "^4.0.0"
     universalify "^0.1.0"
 
+fs-extra@^8.1.0:
+  version "8.1.0"
+  resolved "https://registry.npm.taobao.org/fs-extra/download/fs-extra-8.1.0.tgz#49d43c45a88cd9677668cb7be1b46efdb8d2e1c0"
+  integrity sha1-SdQ8RaiM2Wd2aMt74bRu/bjS4cA=
+  dependencies:
+    graceful-fs "^4.2.0"
+    jsonfile "^4.0.0"
+    universalify "^0.1.0"
+
 fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
@@ -573,6 +582,11 @@ got@^6.7.1:
 graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6:
   version "4.1.11"
   resolved "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
+
+graceful-fs@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.npm.taobao.org/graceful-fs/download/graceful-fs-4.2.0.tgz#8d8fdc73977cb04104721cb53666c1ca64cd328b"
+  integrity sha1-jY/cc5d8sEEEchy1NmbBymTNMos=
 
 graceful-fs@~3.0.2:
   version "3.0.11"
@@ -829,24 +843,12 @@ latest-version@^3.0.0:
   dependencies:
     package-json "^4.0.0"
 
-load-git@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/load-git/-/load-git-1.3.0.tgz#253ba79510a3cf0c5191da42accfdddc220cadb3"
+load-git@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.npmjs.org/load-git/-/load-git-1.4.0.tgz#1c552e3792f9898ef2b09fb76f195c8431089a52"
+  integrity sha512-Mn2w5s5LM25bJf1Id49IIRuhwmVwkIMF6a8aqS89czcoYfv18UBJNt7UDoUxe8LDhsfsPz/5zGZIWnyD/soRMA==
   dependencies:
-    fs-extra "^7.0.0"
-    mkdirp "^0.5.1"
-    request "^2.88.0"
-    request-promise-native "^1.0.5"
-    rmrf "^2.0.0"
-    unzip "^0.1.11"
-    url "^0.11.0"
-    uuid "^3.3.2"
-
-load-git@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.npmjs.org/load-git/-/load-git-1.3.1.tgz#bfcedbc23cc70ba77aaaf35d401c7b1ca299744d"
-  dependencies:
-    fs-extra "^7.0.0"
+    fs-extra "^8.1.0"
     mkdirp "^0.5.1"
     request "^2.88.0"
     request-promise-native "^1.0.5"
@@ -864,14 +866,14 @@ load-json-file@^4.0.0:
     pify "^3.0.0"
     strip-bom "^3.0.0"
 
-load-proto@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/load-proto/-/load-proto-2.0.2.tgz#f0d1f250c802aa32d4429ccccd2d6b49be3f28f5"
-  integrity sha512-eGyohRy3qQLrPANZ9HbRCiBAtd26kRmg+JcUon6paYtN1SFR4MD34BaK5BoReW3Ii7bk6mciMGjT3xVlaAW5tA==
+load-proto@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.npmjs.org/load-proto/-/load-proto-2.0.3.tgz#09b3101e6867bc27b0b1fc6ff87c62d7cf1f3483"
+  integrity sha512-HGyyYn9J0t/TsH++cVwKN9qHbkFJTi1/zWCPhQPwPrEbHLI2WWYkel4uwcSXhM98lyPwTxojkmXN0OODOgq0yw==
   dependencies:
     fs-extra "^7.0.0"
     glob "^7.1.3"
-    load-git "^1.3.0"
+    load-git "^1.4.0"
     lodash "^4.17.11"
     protobufjs "^6.8.8"
 
