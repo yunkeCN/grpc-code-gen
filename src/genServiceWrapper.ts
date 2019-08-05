@@ -38,6 +38,16 @@ const logOptions = config.logOptions ? { ...config.logOptions } : { enable: true
 
 const callOptions = config.callOptions ? { ...config.callOptions } : {}
 
+function needRetry(err: any): boolean {
+  if ([2, 14].indexOf(err.code) > -1) {
+    return true;
+  }
+  if (/^Internal HTTP2 error/.test(err.details || err.message || err.data)) {
+    return true;
+  }
+  return false;
+}
+
 export default function serviceWrapper<Type>(Service: Type): Type {
   Object.keys((Service as any).prototype).forEach((key) => {
     if (!/^\\$/.test(key)) {
@@ -87,7 +97,7 @@ export default function serviceWrapper<Type>(Service: Type): Type {
               }
             }
 
-            if (err && count < maxTry && /^Internal HTTP2 error/.test(err.details || err.message || err.data)) {
+            if (err && count < maxTry && needRetry(err)) {
               count++;
               setTimeout(() => {
                 doCall(self);
