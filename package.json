@@ -20,8 +20,8 @@
     "commander": "^2.19.0",
     "cross-spawn": "^6.0.5",
     "fs-extra": "^8.1.0",
-    "load-git": "^1.4.0",
-    "load-proto": "^2.0.3",
+    "load-git": "^1.5.0",
+    "load-proto": "^2.0.4",
     "lodash": "^4.17.11"
   },
   "devDependencies": {
