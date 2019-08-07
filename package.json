@@ -22,7 +22,7 @@
     "fs-extra": "^8.1.0",
     "load-git": "^1.5.0",
     "load-proto": "^2.0.4",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.15"
   },
   "devDependencies": {
     "@grpc/grpc-js": "^0.5.0",
@@ -30,10 +30,13 @@
     "@types/fs-extra": "^5.0.4",
     "@types/lodash": "^4.14.116",
     "@types/protobufjs": "^6.0.0",
-    "gts": "^0.8.0",
+    "gts": "^1.1.0",
     "json-semantic": "^1.1.0",
+    "prettier": "^1.18.2",
     "ts-node": "^7.0.1",
     "tsconfig-paths": "^3.6.0",
-    "typescript": "^3.1.1"
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.1.1",
+    "update-notifier": "^3.0.1"
   }
 }
