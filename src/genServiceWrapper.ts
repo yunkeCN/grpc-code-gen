@@ -39,10 +39,11 @@ const logOptions = config.logOptions ? { ...config.logOptions } : { enable: true
 const callOptions = config.callOptions ? { ...config.callOptions } : {}
 
 function needRetry(err: any): boolean {
-  if ([2, 14].indexOf(err.code) > -1) {
+  const message = err.details || err.message || err.data;
+  if (/^TCP Read failed/.test(message)) {
     return true;
   }
-  if (/^Internal HTTP2 error/.test(err.details || err.message || err.data)) {
+  if (/^Internal HTTP2 error/.test(message)) {
     return true;
   }
   return false;
