@@ -68,7 +68,7 @@ logOptions? | [logOptions](#logOptions) | 日志配置 | null
 ---|---|---|---
 timeout? | number | 超时时间，单位：ms | undefined
 
-#### callOptions
+#### logOptions
 
 参数 | 类型 | 说明 | 默认值
 ---|---|---|---
