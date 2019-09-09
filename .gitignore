@@ -8,3 +8,4 @@ build
 build
 test/code-gen
 test/code-gen-cli
+node_modules

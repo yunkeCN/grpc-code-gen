@@ -202,12 +202,34 @@ export default async function genServices(opt: {
       `  $FILE_NAME: string;`,
       `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};\n`,
       ...methodStrArr,
+      `  restartServer?: Function;`,
+      `  closeServer?: Function;`,
       `}`,
       `const Service: ${typeName} = get<any, string>(grpcObject, '${service.fullName}');`,
       `Service.$FILE_NAME = '${service.filename && service.filename.replace(/\\/g, '/')}';`,
       `export const ${service.name}: ${typeName} = serviceWrapper<${typeName}>(Service);`,
       `export default ${service.name};`,
-      `export const ${service.name[0].toLowerCase()}${service.name.slice(1)} = getGrpcClient<${typeName}>(${service.name});\n`,
+      // `export const ${service.name[0].toLowerCase()}${service.name.slice(1)} = getGrpcClient<${typeName}>(${service.name});\n`,
+      // add
+      `export let base${service.name[0]}${service.name.slice(1)} = getGrpcClientFactory();`,
+      `function getGrpcClientFactory() { return getGrpcClient<${typeName}>(${service.name}) };`,
+      `export const ${service.name[0].toLowerCase()}${service.name.slice(1)} = <${typeName}>(new Object());`,
+      `Object.entries(base${service.name[0]}${service.name.slice(1)}.constructor.prototype).filter(([methodName]) => /^[A-Za-z0-9]+$/g.test(methodName)).forEach(item => {
+  ${service.name[0].toLowerCase()}${service.name.slice(1)}[item[0]] = item[1]
+});`,
+      `Object.keys(${service.name[0].toLowerCase()}${service.name.slice(1)}).forEach(item => { Object.defineProperty(${service.name[0].toLowerCase()}${service.name.slice(1)}, item, { 
+  get: function () { return async function (...opction:[]) {
+  try{ return await base${service.name[0]}${service.name.slice(1)}[item](...opction) } catch (err){
+    restrtGrpcRules(base${service.name[0]}${service.name.slice(1)}, err); console.info(err); throw new Error(err) 
+  }}}
+})});`,
+      `Service.prototype.restartServer = base${service.name[0]}${service.name.slice(1)}.restartServer = function () { base${service.name[0]}${service.name.slice(1)} = getGrpcClientFactory()};`,
+      `Service.prototype.closeServer = base${service.name[0]}${service.name.slice(1)}.closeServer = function () { this.close(); base${service.name[0]}${service.name.slice(1)} = null;}`,
+      `const cache = {regs: [/failed.+connect/,/deadline.+exceeded/,/cannot.+read.+property/,/tcp.+read.+failed/,/internal.+http2.+error/,/stream.+removed/]}`,
+      `function restrtGrpcRules(server: any, err: any){
+  const message = (err.details || err.message || err.error || '').toLowerCase();
+  if (cache.regs.some(item => item.test(message))) { console.info('*******grpc server restart success.*******');server.closeServer(); server.restartServer() };
+}`
     ].join('\n'));
   });
 }
