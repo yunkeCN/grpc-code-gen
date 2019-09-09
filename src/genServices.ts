@@ -209,8 +209,6 @@ export default async function genServices(opt: {
       `Service.$FILE_NAME = '${service.filename && service.filename.replace(/\\/g, '/')}';`,
       `export const ${service.name}: ${typeName} = serviceWrapper<${typeName}>(Service);`,
       `export default ${service.name};`,
-      // `export const ${service.name[0].toLowerCase()}${service.name.slice(1)} = getGrpcClient<${typeName}>(${service.name});\n`,
-      // add
       `export let base${service.name[0]}${service.name.slice(1)} = getGrpcClientFactory();`,
       `function getGrpcClientFactory() { return getGrpcClient<${typeName}>(${service.name}) };`,
       `export const ${service.name[0].toLowerCase()}${service.name.slice(1)} = <${typeName}>(new Object());`,
