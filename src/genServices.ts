@@ -216,7 +216,9 @@ export default async function genServices(opt: {
   .filter(([methodName]) => /^[A-Za-z0-9]+$/g.test(methodName)).forEach(item => {
     (${service.name[0].toLowerCase()}${service.name.slice(1)} as any)[item[0]] = async function (...option: []) {
       try { return await (base${service.name[0]}${service.name.slice(1)} as any)[item[0]](...option) } catch (err) {
-        restrtGrpcRules(base${service.name[0]}${service.name.slice(1)}, err); console.info(err); throw new Error(err)
+        restrtGrpcRules(base${service.name[0]}${service.name.slice(1)}, err); 
+        console.info(err);
+        throw err;
       }
     }
   });`,
