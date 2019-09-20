@@ -56,7 +56,7 @@ branch |  string | 分支，如参数没有，会去读取环境变量参数`bra
 accessToken | string | git access token | `null`
 baseDir? | string | 生成目录 | `null`
 target? | `javascript typescript` | 目标语言 | `null`
-grpcNpmName? | string | grpc npm name, 可取值：`grpc`, `@grpc/grpc-js`, `@yued/grpc-js` | `@grpc/grpc-js`
+grpcNpmName? | string | grpc npm name, 可取值：`grpc`, `@grpc/grpc-js` | `grpc`
 jsonSemanticTypes? | boolean | 生成json semantic types | `false`  
 loaderOptions? | [LoaderOptions](https://github.com/grpc/grpc-node/tree/master/packages/proto-loader) | loader生成配置 | `{ defaults: true }`
 callOptions? | [callOptions](#callOptions) | 方法调用配置 | null
