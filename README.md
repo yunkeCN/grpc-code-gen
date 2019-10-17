@@ -61,6 +61,7 @@ jsonSemanticTypes? | boolean | 生成json semantic types | `false`
 loaderOptions? | [LoaderOptions](https://github.com/grpc/grpc-node/tree/master/packages/proto-loader) | loader生成配置 | `{ defaults: true }`
 callOptions? | [callOptions](#callOptions) | 方法调用配置 | null
 logOptions? | [logOptions](#logOptions) | 日志配置 | null
+filterError? | (err: Error) => Error | 错误过滤 | (err) => err
 
 #### callOptions
 

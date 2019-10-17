@@ -38,6 +38,8 @@ const logOptions = config.logOptions ? { ...config.logOptions } : { enable: true
 
 const callOptions = config.callOptions ? { ...config.callOptions } : {}
 
+const filterError = config.filterError || (err: Error)=> e;
+
 function needRetry(err: any): boolean {
   const message = err.details || err.message || err.data;
   if (/^TCP Read failed/.test(message)) {
@@ -104,7 +106,7 @@ export default function serviceWrapper<Type>(Service: Type): Type {
                 doCall(self);
               }, 25);
             } else {
-              callback(err, response, metadataRes);
+              callback(filterError(err), response, metadataRes);
             }
           }]);
         }
