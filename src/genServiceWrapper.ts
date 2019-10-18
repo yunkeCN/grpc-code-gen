@@ -38,7 +38,7 @@ const logOptions = config.logOptions ? { ...config.logOptions } : { enable: true
 
 const callOptions = config.callOptions ? { ...config.callOptions } : {}
 
-const filterError = config.filterError || ((err: Error)=> e);
+const filterError = config.filterError || ((err: Error)=> err);
 
 function needRetry(err: any): boolean {
   const message = err.details || err.message || err.data;
