@@ -106,7 +106,7 @@ export default function serviceWrapper<Type>(Service: Type): Type {
                 doCall(self);
               }, 25);
             } else {
-              callback(filterError(err), response, metadataRes);
+              callback(err && filterError(err), response, metadataRes);
             }
           }]);
         }
