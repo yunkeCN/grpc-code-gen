@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra';
 import { IOption, loadProto } from 'load-proto';
+import { Options as LoaderOptions } from 'load-proto/build/loader';
 import { get, set } from 'lodash';
 import * as path from 'path';
 import genGetGrpcClient from "./genGetGrpcClient";
@@ -18,6 +19,7 @@ export interface Options extends IOption {
   target?: 'javascript' | 'typescript';
   configFilePath?: string;
   grpcNpmName?: string;
+  loaderOptions?: LoaderOptions;
 }
 
 export async function gen(opt: Options): Promise<string> {
@@ -30,6 +32,7 @@ export async function gen(opt: Options): Promise<string> {
     accessToken,
     resolvePath,
     grpcNpmName = 'grpc',
+    loaderOptions,
   } = opt;
 
   fs.removeSync(baseDir);
@@ -96,7 +99,7 @@ export async function gen(opt: Options): Promise<string> {
   const typesPath = getAbsPath('types.ts', baseDir);
   await fs.writeFile(
     typesPath,
-    genTsType({ namespace, root, messages, enums }),
+    genTsType({ namespace, root, messages, enums, loaderOptions }),
   );
 
   const serviceWrapperPath = getAbsPath(`serviceWrapper.ts`, baseDir);
@@ -122,6 +125,7 @@ export async function gen(opt: Options): Promise<string> {
     root,
     services,
     typesPath,
+    loaderOptions,
   });
 
   console.info(`Generate success in ${baseDir}`);

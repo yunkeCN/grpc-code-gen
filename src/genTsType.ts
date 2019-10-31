@@ -1,6 +1,11 @@
 import { Root } from 'protobufjs';
+import { Options as LoaderOptions } from 'load-proto/build/loader';
 import { TEnum, TMessage, TNamespace } from "./types";
-import { fileTip, PROTO_TYPE_2_JSON_SEMANTIC_MAP, PROTO_TYPE_2_TS_TYPE_MAP, tslintDisable } from "./utils";
+import {
+  fileTip,
+  getTsTypeFactory,
+  tslintDisable
+} from "./utils";
 
 function genSpace(num: number) {
   let space = '';
@@ -21,55 +26,6 @@ function walkPackagePath(packagePath: string, type: string, map: { [key: string]
   return walkPackagePath(split.slice(0, split.length - 1).join('.'), type, map);
 }
 
-function getTsType(
-  protoType: string,
-  fullName: string,
-  config: {
-    root: Root,
-    messageMap: { [key: string]: TMessage },
-    enumMap: { [key: string]: TEnum },
-  },
-  isArr?: boolean,
-): { tsType: string, semanticType?: string, basic: boolean } {
-  const basic = PROTO_TYPE_2_TS_TYPE_MAP[protoType];
-  if (basic) {
-    return {
-      tsType: basic,
-      semanticType: PROTO_TYPE_2_JSON_SEMANTIC_MAP[protoType],
-      basic: true,
-    }
-  }
-
-  if (/\./.test(protoType)) {
-    return {
-      tsType: protoType,
-      semanticType: isArr ? `ArraySchemaWithGenerics<${protoType}>` : undefined,
-      basic: false,
-    };
-  }
-
-  const { messageMap, enumMap, root } = config;
-
-  let tsType = walkPackagePath(fullName, protoType, messageMap) ||
-    walkPackagePath(fullName, protoType, enumMap);
-
-  if (!tsType) {
-    const typeOrEnum = root.lookupTypeOrEnum(protoType);
-    if (typeOrEnum) {
-      tsType = typeOrEnum.fullName.replace(/^\./, '');
-    }
-  }
-
-  if (tsType) {
-    return {
-      tsType: tsType,
-      semanticType: isArr ? `ArraySchemaWithGenerics<${tsType}>` : undefined,
-      basic: false,
-    };
-  }
-  throw new Error(`${protoType} not exist in message: ${fullName}`);
-}
-
 function doGenTsType(
   namespace: TNamespace,
   config: {
@@ -77,9 +33,12 @@ function doGenTsType(
     messageMap: { [key: string]: TMessage },
     enumMap: { [key: string]: TEnum },
     withJsonSemantic?: boolean,
+    loaderOptions?: LoaderOptions,
   },
   deep: number = 0,
 ): string {
+  const getTsType = getTsTypeFactory(walkPackagePath, config.loaderOptions);
+
   let str = '';
   const { messages, enums, nested } = namespace;
   const space = genSpace(deep * 2);
@@ -179,12 +138,14 @@ export default function genTsType(opt: {
   root: Root;
   messages: TMessage[];
   enums: TEnum[];
+  loaderOptions?: LoaderOptions,
 }): string {
   const {
     namespace,
     root,
     messages,
     enums,
+    loaderOptions,
   } = opt;
 
   const messageMap: { [key: string]: TMessage } = {};
@@ -200,6 +161,6 @@ export default function genTsType(opt: {
   return [
     fileTip,
     tslintDisable,
-    doGenTsType(namespace, { root, messageMap, enumMap }),
+    doGenTsType(namespace, { root, messageMap, enumMap, loaderOptions, }),
   ].join('\n');
 }

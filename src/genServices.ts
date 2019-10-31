@@ -1,15 +1,15 @@
 import * as fs from "fs-extra";
 import { get, set } from 'lodash';
 import { Root } from 'protobufjs';
+import { Options as LoaderOptions } from 'load-proto/build/loader';
 import { TEnum, TMessage, TMethod, TService } from "./types";
 import {
   fileTip,
   getAbsPath,
   getImportPath,
   getPackageName,
-  PROTO_TYPE_2_JSON_SEMANTIC_MAP,
-  PROTO_TYPE_2_TS_TYPE_MAP,
-  tslintDisable
+  getTsTypeFactory,
+  tslintDisable,
 } from "./utils";
 
 interface TNamespace {
@@ -18,7 +18,11 @@ interface TNamespace {
   nested?: { [name: string]: TNamespace };
 }
 
-function walkPackagePath(packagePath: string, type: string, map: { [key: string]: any }): string | null {
+function walkPackagePath(
+  packagePath: string,
+  type: string,
+  map: { [key: string]: any },
+): string | null {
   if (map[`${packagePath}.${type}`]) {
     return `${packagePath}.${type}`;
   }
@@ -27,55 +31,6 @@ function walkPackagePath(packagePath: string, type: string, map: { [key: string]
     return null;
   }
   return walkPackagePath(split.slice(0, split.length - 1).join('.'), type, map);
-}
-
-function getTsType(
-  protoType: string,
-  fullName: string,
-  config: {
-    root: Root,
-    messageMap: { [key: string]: TMessage },
-    enumMap: { [key: string]: TEnum },
-  },
-  isArr?: boolean,
-): { tsType: string, semanticType?: string, basic: boolean } {
-  const basic = PROTO_TYPE_2_TS_TYPE_MAP[protoType];
-  if (basic) {
-    return {
-      tsType: basic,
-      semanticType: PROTO_TYPE_2_JSON_SEMANTIC_MAP[protoType],
-      basic: true,
-    }
-  }
-
-  if (/\./.test(protoType)) {
-    return {
-      tsType: protoType,
-      semanticType: isArr ? `ArraySchemaWithGenerics<${protoType}>` : undefined,
-      basic: false,
-    };
-  }
-
-  const { messageMap, enumMap, root } = config;
-
-  let tsType = walkPackagePath(fullName, protoType, messageMap) ||
-    walkPackagePath(fullName, protoType, enumMap);
-
-  if (!tsType) {
-    const typeOrEnum = root.lookupTypeOrEnum(protoType);
-    if (typeOrEnum) {
-      tsType = typeOrEnum.fullName.replace(/^\./, '');
-    }
-  }
-
-  if (tsType) {
-    return {
-      tsType: tsType,
-      semanticType: isArr ? `ArraySchemaWithGenerics<${tsType}>` : undefined,
-      basic: false,
-    };
-  }
-  throw new Error(`${protoType} not exist in message: ${fullName}`);
 }
 
 export default async function genServices(opt: {
@@ -92,6 +47,7 @@ export default async function genServices(opt: {
   baseDir: string;
   root: Root;
   grpcObjPath: string;
+  loaderOptions?: LoaderOptions;
 }): Promise<void> {
   const {
     grpcNpmName,
@@ -105,7 +61,10 @@ export default async function genServices(opt: {
     enums,
     messages,
     root,
+    loaderOptions,
   } = opt;
+
+  const getTsType = getTsTypeFactory(walkPackagePath, loaderOptions);
 
   const grpcNative = grpcNpmName === 'grpc';
 
