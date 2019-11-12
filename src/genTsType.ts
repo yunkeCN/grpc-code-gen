@@ -36,12 +36,17 @@ function doGenTsType(
     loaderOptions?: LoaderOptions,
   },
   deep: number = 0,
+  space_: string,
+  service: string,
+  index: number = 0,
 ): string {
   const getTsType = getTsTypeFactory(walkPackagePath, config.loaderOptions);
 
   let str = '';
   const { messages, enums, nested } = namespace;
   const space = genSpace(deep * 2);
+  service = service.replace(/-/g, '_')
+
   if (messages) {
     str += Object
       .keys(messages)
@@ -59,7 +64,7 @@ function doGenTsType(
         const fieldDefine = message.fields
           .map((field) => {
             const isArr = field.repeated;
-            const { tsType, semanticType } = getTsType(field.type, message.fullName, config, isArr);
+            const { tsType, semanticType } = getTsType(field.type, message.fullName, config, isArr, space_, service);
 
             let res = `${space}  '${field.name}'${field.required ? '' : '?'}: `;
 
@@ -125,8 +130,16 @@ function doGenTsType(
         return 0;
       })
       .map((name) => {
-        str += `${space}export namespace ${name} {\n`;
-        str += doGenTsType(nested[name], config, nextDeep);
+        if ((name === 'common' || name === 'google') && index > 0) {
+          return
+        }
+        // common 和 google不需要加前缀，第二层即以上命名空间不需要加前缀
+        const namespace =
+          name !== 'common' && name !== 'google' && space_ && service && nextDeep <= 1
+            ? `n_${space_}_${service}_${name}` : name
+
+        str += `${space}export namespace ${namespace} {\n`;
+        str += doGenTsType(nested[name], config, nextDeep, space_, service, index);
         str += `${space}}\n`;
       });
   }
@@ -138,7 +151,10 @@ export default function genTsType(opt: {
   root: Root;
   messages: TMessage[];
   enums: TEnum[];
+  space: string;
+  service: string;
   loaderOptions?: LoaderOptions,
+  index?: number;
 }): string {
   const {
     namespace,
@@ -146,6 +162,9 @@ export default function genTsType(opt: {
     messages,
     enums,
     loaderOptions,
+    space,
+    service,
+    index
   } = opt;
 
   const messageMap: { [key: string]: TMessage } = {};
@@ -161,6 +180,6 @@ export default function genTsType(opt: {
   return [
     fileTip,
     tslintDisable,
-    doGenTsType(namespace, { root, messageMap, enumMap, loaderOptions, }),
+    doGenTsType(namespace, { root, messageMap, enumMap, loaderOptions }, 0, space, service, index),
   ].join('\n');
 }

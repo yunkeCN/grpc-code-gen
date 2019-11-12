@@ -79,6 +79,8 @@ export function getTsTypeFactory(
       enumMap: { [key: string]: TEnum },
     },
     isArr?: boolean,
+    space?: string,
+    service?: string,
   ): { tsType: string, semanticType?: string, basic: boolean } {
     let basic = PROTO_TYPE_2_TS_TYPE_MAP[protoType];
     if (basic) {
@@ -115,6 +117,8 @@ export function getTsTypeFactory(
     }
 
     if (tsType) {
+      // 排除 google 类
+      tsType = /^google/.test(tsType) ? tsType : `n_${space}_${service}_${tsType}`
       return {
         tsType: tsType,
         semanticType: isArr ? `ArraySchemaWithGenerics<${tsType}>` : undefined,
