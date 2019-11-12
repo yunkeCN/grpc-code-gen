@@ -110,9 +110,6 @@ export async function gen(opt: Options): Promise<string> {
   );
 
 
-  // 先清空一次
-  // await fs.writeFile(getAbsPath('types.ts', baseDir), '');
-
   allResult.map(async (item: { result: any, root: any, [propname: string]: any }, index: number) => {
 
     const { result, root, space, service } = item
