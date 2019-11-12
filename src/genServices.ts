@@ -67,7 +67,7 @@ export default async function genServices(opt: {
     space,
     service: service_
   } = opt;
-  
+
   // 新增团队级的文件夹
   baseDir = space ? `${baseDir}/${space}/${service_}` : baseDir
   service_ = service_.replace(/-/g, '_')
@@ -133,8 +133,8 @@ export default async function genServices(opt: {
         return 0;
       })
       .map((method) => {
-        const requestType = 'types.' + getTsType(method.requestType, packageName, config, false, space, service_).tsType;
-        const responseType = `types.${getTsType(method.responseType, packageName, config, false, space, service_).tsType}`;
+        const requestType = 'types.' + getTsType(method.requestType, packageName, config).tsType;
+        const responseType = `types.${getTsType(method.responseType, packageName, config).tsType}`;
         return `  /** @deprecated 请使用: ${method.name}V2 */
   ${method.name}(
     request: ${requestType},
@@ -172,7 +172,7 @@ export default async function genServices(opt: {
       `  restartServer?: Function;`,
       `  closeServer?: Function;`,
       `}`,
-      `const Service: ${typeName} = get<any, string>(grpcObject, '${service.fullName}');`,
+      `const Service: ${typeName} = get<any, string>(grpcObject, '${space}_${service_}.${service.fullName}');`,
       `Service.$FILE_NAME = '${service.filename && service.filename.replace(/\\/g, '/')}';`,
       `export const ${service.name}: ${typeName} = serviceWrapper<${typeName}>(Service);`,
       `export default ${service.name};`,

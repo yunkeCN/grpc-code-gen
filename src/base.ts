@@ -46,8 +46,9 @@ export async function gen(opt: Options): Promise<string> {
 
   const firstUrl = gitUrls.splice(0, 1)
   let allResult: Array<{ result: any, root: any, [propname: string]: any }> = []
+  let alljson: { [propname: string]: any } = {}
 
-  const json: any = await Promise.all(gitUrls.map(async (url) => {
+  await Promise.all(gitUrls.map(async (url) => {
     const newUrl: any = url
     const root = await loadProto({
       gitUrls: [...firstUrl, url],
@@ -57,8 +58,6 @@ export async function gen(opt: Options): Promise<string> {
     });
     root.resolveAll();
     const json: any = root.toJSON({ keepComments: true });
-    delete json.nested.google
-    delete json.nested.common
 
     const [space, service]: any[] = newUrl.match(/:.+-proto/)[0].replace(/:|-proto/g, '').split('/')
 
@@ -68,21 +67,20 @@ export async function gen(opt: Options): Promise<string> {
       space,
       service
     })
-
-    return { space, service, json }
+    alljson[`${space}_${service.replace(/-/g, '_')}`] = json
   }))
 
 
   fs.mkdirpSync(path.join(process.cwd(), '.grpc-code-gen'));
 
   const jsonPath = path.join(process.cwd(), '.grpc-code-gen', 'root.json');
-  await fs.writeJSON(jsonPath, json);
+  await fs.writeJSON(jsonPath, alljson);
 
   if (!allResult.length) {
     throw new Error('None code gen');
   }
 
-  
+
   const grpcObjPath = getAbsPath(`grpcObj.ts`, baseDir);
   await fs.writeFile(
     grpcObjPath,
@@ -113,10 +111,10 @@ export async function gen(opt: Options): Promise<string> {
 
 
   // 先清空一次
-  await fs.writeFile(getAbsPath('types.ts', baseDir), '');
+  // await fs.writeFile(getAbsPath('types.ts', baseDir), '');
 
-  allResult.map((item: { result: any, root: any, [propname: string]: any }, index: number) => {
-    
+  allResult.map(async (item: { result: any, root: any, [propname: string]: any }, index: number) => {
+
     const { result, root, space, service } = item
     const { services, methods, messages, enums } = result;
 
@@ -136,13 +134,14 @@ export async function gen(opt: Options): Promise<string> {
       set(namespace, nameSpacePath, latest);
     });
 
-    const typesPath = getAbsPath('types.ts', baseDir);
-    fs.appendFile(
+    const typesPath = getAbsPath('types.ts', space && service ? `${baseDir}/${space}/${service}` : baseDir);
+    space && service && await fs.mkdirp(`${baseDir}/${space}/${service}`);
+    await fs.writeFile(
       typesPath,
-      genTsType({ namespace, root, messages, enums, loaderOptions, space, service, index }),
+      genTsType({ namespace, root, messages, enums, loaderOptions }),
     );
 
-    genServices({
+    await genServices({
       grpcClientPath,
       serviceWrapperPath,
       messages,
