@@ -48,8 +48,10 @@ export default async function genServices(opt: {
   root: Root;
   grpcObjPath: string;
   loaderOptions?: LoaderOptions;
+  space: string;
+  service: string;
 }): Promise<void> {
-  const {
+  let {
     grpcNpmName,
     grpcObjPath,
     typesPath,
@@ -62,7 +64,13 @@ export default async function genServices(opt: {
     messages,
     root,
     loaderOptions,
+    space,
+    service: service_
   } = opt;
+
+  // 新增团队级的文件夹
+  baseDir = space ? `${baseDir}/${space}/${service_}` : baseDir
+  service_ = service_.replace(/-/g, '_')
 
   const getTsType = getTsTypeFactory(walkPackagePath, loaderOptions);
 
@@ -164,7 +172,7 @@ export default async function genServices(opt: {
       `  restartServer?: Function;`,
       `  closeServer?: Function;`,
       `}`,
-      `const Service: ${typeName} = get<any, string>(grpcObject, '${service.fullName}');`,
+      `const Service: ${typeName} = get<any, string>(grpcObject, '${space}_${service_}.${service.fullName}');`,
       `Service.$FILE_NAME = '${service.filename && service.filename.replace(/\\/g, '/')}';`,
       `export const ${service.name}: ${typeName} = serviceWrapper<${typeName}>(Service);`,
       `export default ${service.name};`,

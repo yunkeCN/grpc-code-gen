@@ -17,14 +17,17 @@ export default function genGrpcObj(opt: {
     `import { loadFromJson } from 'load-proto';\n`,
     isNative ? `import { EventEmitter } from "events";` : `import { Status } from '${grpcNpmName}/build/src/constants';`,
     `const root = require('${getImportPath(grpcObjPath, jsonPath)}');\n`,
-    `let config;`,
+    `let config: any;`,
     `if (fs.existsSync(require.resolve('${getImportPath(grpcObjPath, configFilePath as string)}'))) {
   config = require('${getImportPath(grpcObjPath, configFilePath as string)}');
 }`,
-    `const grpcObject = grpc.loadPackageDefinition(loadFromJson(`,
-    `  root,`,
-    `  (config && config.loaderOptions) || { defaults: true },`,
-    `));\n`,
+    `const grpcObjectGroup: any = {}`,
+    `Object.keys(root).forEach((key: string) => {`,
+    ` grpcObjectGroup[key] = grpc.loadPackageDefinition(loadFromJson(`,
+    `   root[key],`,
+    `   (config && config.loaderOptions) || { defaults: true },`,
+    ` ));`,
+    `});\n`,
     `// fix: grpc-message header split by comma
 grpc.Metadata.prototype.getMap = function() {
   const result: any = {};
@@ -127,6 +130,6 @@ clientInterceptors.getLastListener = function (method_definition: any, emitter: 
     }
   });
 };`,
-    `export default grpcObject;`,
+    `export default grpcObjectGroup;`,
   ].join('\n')
 }

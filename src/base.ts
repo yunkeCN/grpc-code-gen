@@ -40,44 +40,46 @@ export async function gen(opt: Options): Promise<string> {
 
   fs.mkdirpSync(baseDir);
 
-  const root = await loadProto({
-    gitUrls,
-    branch,
-    accessToken,
-    resolvePath,
-  });
-  root.resolveAll();
+  if (gitUrls.length <= 1) {
+    throw new Error('gitUrls must be more than two parameters');
+  }
 
-  const json = root.toJSON({ keepComments: true });
+  const firstUrl = gitUrls.splice(0, 1)
+  let allResult: Array<{ result: any, root: any, [propname: string]: any }> = []
+  let alljson: { [propname: string]: any } = {}
+
+  await Promise.all(gitUrls.map(async (url) => {
+    const newUrl: any = url
+    const root = await loadProto({
+      gitUrls: [...firstUrl, url],
+      branch,
+      accessToken,
+      resolvePath,
+    });
+    root.resolveAll();
+    const json: any = root.toJSON({ keepComments: true });
+
+    const [space, service]: any[] = newUrl.match(/:.+-proto/)[0].replace(/:|-proto/g, '').split('/')
+
+    allResult.push({
+      result: inspectNamespace(root),
+      root,
+      space,
+      service
+    })
+    alljson[`${space}_${service.replace(/-/g, '_')}`] = json
+  }))
+
 
   fs.mkdirpSync(path.join(process.cwd(), '.grpc-code-gen'));
 
   const jsonPath = path.join(process.cwd(), '.grpc-code-gen', 'root.json');
-  await fs.writeJSON(jsonPath, json);
+  await fs.writeJSON(jsonPath, alljson);
 
-  const result = inspectNamespace(root);
-
-  if (!result) {
+  if (!allResult.length) {
     throw new Error('None code gen');
   }
 
-  const { services, methods, messages, enums } = result;
-
-  const namespace: TNamespace = {};
-  messages.forEach((message) => {
-    const packageName = getPackageName(message.fullName);
-    const nameSpacePath = 'nested.' + packageName.replace(/\./g, '.nested.');
-    const latest = get(namespace, nameSpacePath, { messages: {} });
-    latest.messages[message.name] = message;
-    set(namespace, nameSpacePath, latest);
-  });
-  enums.forEach((enumT) => {
-    const packageName = getPackageName(enumT.fullName);
-    const nameSpacePath = 'nested.' + packageName.replace(/\./g, '.nested.');
-    const latest = get(namespace, nameSpacePath, { enums: {} });
-    latest.enums[enumT.name] = enumT;
-    set(namespace, nameSpacePath, latest);
-  });
 
   const grpcObjPath = getAbsPath(`grpcObj.ts`, baseDir);
   await fs.writeFile(
@@ -96,11 +98,6 @@ export async function gen(opt: Options): Promise<string> {
     genGetGrpcClient(grpcNpmName, grpcClientPath),
   );
 
-  const typesPath = getAbsPath('types.ts', baseDir);
-  await fs.writeFile(
-    typesPath,
-    genTsType({ namespace, root, messages, enums, loaderOptions }),
-  );
 
   const serviceWrapperPath = getAbsPath(`serviceWrapper.ts`, baseDir);
   await fs.writeFile(
@@ -112,21 +109,57 @@ export async function gen(opt: Options): Promise<string> {
     }),
   );
 
-  await genServices({
-    grpcClientPath,
-    serviceWrapperPath,
-    messages,
-    methods,
-    grpcNpmName,
-    configFilePath: configFilePath as string,
-    grpcObjPath,
-    baseDir,
-    enums,
-    root,
-    services,
-    typesPath,
-    loaderOptions,
-  });
+
+  allResult.map(async (item: { result: any, root: any, [propname: string]: any }, index: number) => {
+
+    const { result, root, space, service } = item
+    const { services, methods, messages, enums } = result;
+
+    const namespace: TNamespace = {};
+    messages.forEach((message: any) => {
+      const packageName = getPackageName(message.fullName);
+      const nameSpacePath = 'nested.' + packageName.replace(/\./g, '.nested.');
+      const latest = get(namespace, nameSpacePath, { messages: {} });
+      latest.messages[message.name] = message;
+      set(namespace, nameSpacePath, latest);
+    });
+    enums.forEach((enumT: any) => {
+      const packageName = getPackageName(enumT.fullName);
+      const nameSpacePath = 'nested.' + packageName.replace(/\./g, '.nested.');
+      const latest = get(namespace, nameSpacePath, { enums: {} });
+      latest.enums[enumT.name] = enumT;
+      set(namespace, nameSpacePath, latest);
+    });
+
+    const typesPath = getAbsPath('types.ts', space && service ? `${baseDir}/${space}/${service}` : baseDir);
+    space && service && await fs.mkdirp(`${baseDir}/${space}/${service}`);
+    await fs.writeFile(
+      typesPath,
+      genTsType({ namespace, root, messages, enums, loaderOptions }),
+    );
+
+    await genServices({
+      grpcClientPath,
+      serviceWrapperPath,
+      messages,
+      methods,
+      grpcNpmName,
+      configFilePath: configFilePath as string,
+      grpcObjPath,
+      baseDir,
+      enums,
+      root,
+      services,
+      typesPath,
+      loaderOptions,
+      space,
+      service
+    });
+
+  })
+
+
+
 
   console.info(`Generate success in ${baseDir}`);
 
