@@ -22,6 +22,12 @@ export interface Options extends IOption {
   loaderOptions?: LoaderOptions;
 }
 
+interface GitUrlsItem {
+  url: string,
+  branch?: string,
+  [propname: string]: any;
+}
+
 export async function gen(opt: Options): Promise<string> {
   const {
     baseDir = BASE_DIR,
@@ -48,8 +54,8 @@ export async function gen(opt: Options): Promise<string> {
   let allResult: Array<{ result: any, root: any, [propname: string]: any }> = []
   let alljson: { [propname: string]: any } = {}
 
-  await Promise.all(gitUrls.map(async (url) => {
-    const newUrl: any = url
+  await Promise.all(gitUrls.map(async (url: GitUrlsItem | string) => {
+    const newUrl: string = typeof url === 'string' ? url : url.url
     const root = await loadProto({
       gitUrls: [...firstUrl, url],
       branch,
@@ -59,7 +65,7 @@ export async function gen(opt: Options): Promise<string> {
     root.resolveAll();
     const json: any = root.toJSON({ keepComments: true });
 
-    const [space, service]: any[] = newUrl.match(/:.+-proto/)[0].replace(/:|-proto/g, '').split('/')
+    const [space, service]: any[] = (newUrl.match(/:.+-proto/) as any)[0].replace(/:|-proto/g, '').split('/')
 
     allResult.push({
       result: inspectNamespace(root),
