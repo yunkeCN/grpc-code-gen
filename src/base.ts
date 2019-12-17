@@ -65,7 +65,14 @@ export async function gen(opt: Options): Promise<string> {
     root.resolveAll();
     const json: any = root.toJSON({ keepComments: true });
 
-    const [space, service]: any[] = (newUrl.match(/:.+-proto/) as any)[0].replace(/:|-proto/g, '').split('/')
+    let space:string = '' 
+    let service:string = ''
+
+    if (newUrl.indexOf('https://') > -1){
+      [service, space] = newUrl.replace('-proto.git', '').split('/').reverse()
+    } else {
+      [space, service] = (newUrl.match(/:.+-proto/) as any)[0].replace(/:|-proto/g, '').split('/')
+    }
 
     allResult.push({
       result: inspectNamespace(root),
