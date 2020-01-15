@@ -84,6 +84,7 @@ export default async function genServices(opt: {
     const packageName = getPackageName(message.fullName);
     const nameSpacePath = 'nested.' + packageName.replace(/\./g, '.nested.');
     const latest = get(namespace, nameSpacePath, { messages: {} });
+    if (!latest.messages) latest.messages = {}
     latest.messages[message.name] = message;
     set(namespace, nameSpacePath, latest);
 
@@ -93,6 +94,7 @@ export default async function genServices(opt: {
     const packageName = getPackageName(enumT.fullName);
     const nameSpacePath = 'nested.' + packageName.replace(/\./g, '.nested.');
     const latest = get(namespace, nameSpacePath, { enums: {} });
+    if (!latest.enums) latest.enums = {}
     latest.enums[enumT.name] = enumT;
     set(namespace, nameSpacePath, latest);
 
