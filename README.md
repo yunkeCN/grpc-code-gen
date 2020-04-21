@@ -114,6 +114,8 @@ base.gen({
  
 
 ### 版本说明
+- v6.0.6 版本
+新增 access 日志链路
 
 - v6.0.4 版本
 新增 grpc-service.dev.config.js 本地配置，去掉繁琐的本地host配置
