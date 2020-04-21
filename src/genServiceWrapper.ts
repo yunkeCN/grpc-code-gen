@@ -70,7 +70,24 @@ export default function serviceWrapper<Type>(Service: Type): Type {
             break;
         }
 
-        options = Object.assign({}, callOptions, options);
+        const optionCallback = (option:any) => {
+          const {
+            url = '', method = '', headers = {},
+            metadata: callmetadata = {}
+          }: any = option || {}
+          
+          // @ts-ignore
+          console.access(
+            '-------grpc begin-------',
+            'grpc invoke:', methodId,
+            'request:', JSON.stringify({ url, method }),
+            'metadata:', JSON.stringify(callmetadata._internal_repr || metadata),
+            'request:', JSON.stringify(request),
+            'trace.id', headers['trace-id']
+          );
+        }
+
+        options = Object.assign({ optionCallback }, callOptions, options);
 
         let count = 0;
 
@@ -80,21 +97,35 @@ export default function serviceWrapper<Type>(Service: Type): Type {
           }
 
           const start = Date.now();
-          (origin as any).apply(self, [request, toMetadata(metadata), options, function(err: any, response: any, metadataRes: Metadata) {
+          (origin as any).apply(self, [request, toMetadata(metadata), options, function(err: any, response: any, metadataRes: Metadata, elasticOptions:any) {
             if (!logOptions.disable) {
               const duration = (Date.now() - start) / 1000;
-              console.info(
+
+              const {
+                url = '', method = '', headers = {},
+                metadata: callmetadata = {}
+              }: any = elasticOptions || {}
+
+              // @ts-ignore
+              console.access(
+                '-------grpc end-------',
                 'grpc invoke:', methodId,
                 'duration:', duration + 's',
-                'metadata:', JSON.stringify(metadata),
+                'request:', JSON.stringify({ url, method }),
+                'metadata:', JSON.stringify(callmetadata._internal_repr || metadata),
                 'request:', JSON.stringify(request),
+                'trace.id', headers['trace-id']
               );
+
               if (err) {
                 console.error(
+                  '-------grpc-end--------',
                   'grpc invoke:', methodId,
                   'duration:', duration + 's',
-                  'metadata:', JSON.stringify(metadata),
+                  'request:', JSON.stringify({ url, method }),
+                  'metadata:', JSON.stringify(callmetadata || metadata),
                   'request:', JSON.stringify(request),
+                  'trace.id', headers['trace-id'],
                   'err:', err,
                 );
               }
