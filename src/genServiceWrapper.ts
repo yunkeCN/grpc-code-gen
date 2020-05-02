@@ -73,7 +73,7 @@ export default function serviceWrapper<Type>(Service: Type): Type {
         const optionCallback = (option:any) => {
           const {
             url = '', method = '', headers = {},
-            metadata: callmetadata = {}
+            metadata: callmetadata = {}, traceId = ''
           }: any = option || {}
           
           // @ts-ignore
@@ -83,7 +83,7 @@ export default function serviceWrapper<Type>(Service: Type): Type {
             'request:', JSON.stringify({ url, method }),
             'metadata:', JSON.stringify(callmetadata._internal_repr || metadata),
             'request:', JSON.stringify(request),
-            'trace.id', headers['trace-id']
+            'trace.id', headers['trace-id'] || traceId || metadata.traceId || ''
           );
         }
 
