@@ -112,3 +112,23 @@ base.gen({
   });
 ```
  
+
+### 版本说明
+- v6.0.6 版本
+新增 access 日志链路
+
+- v6.0.4 版本
+新增 grpc-service.dev.config.js 本地配置，去掉繁琐的本地host配置
+
+- v6.0.3 版本
+解决编译go proto枚举报错问题
+
+- v6.0.0 版本
+解决grpc-code-gen编译时，后端相同package下有相同service的冲突问题
+
+- v5.4.4 版本
+解决javascript精度文档，js在超过16位的number数字会有精度丢失问题，因此统一把（'double', 'float', 'int64', 'uint64', 'sint64', 'fixed64', 'sfixed64'）类型转换为string类型
+
+- v5.3.0 版本
+bff  grpc 新增热重启功能
+

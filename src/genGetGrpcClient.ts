@@ -28,7 +28,10 @@ if (typeof getServiceConfig !== 'function') {
   process.exit(-1);
 }
 
-const grpcServiceConfigPath = path.resolve(__dirname, '${getImportPath(grpcClientPath, path.join(process.cwd(), 'grpc-service.config.js'))}.js');
+const grpcServiceConfigPath = process.env.NODE_ENV === 'dev' ? 
+  path.resolve(__dirname, '${getImportPath(grpcClientPath, path.join(process.cwd(), 'grpc-service.dev.config.js'))}.js') : 
+  path.resolve(__dirname, '${getImportPath(grpcClientPath, path.join(process.cwd(), 'grpc-service.config.js'))}.js')
+
 
 let grpcServiceConfigLocal: { [serviceName: string]: { host: string; port: number; cert_pem_content?: string } } = {};
 const serviceConfigFileExist = fs.existsSync(grpcServiceConfigPath);

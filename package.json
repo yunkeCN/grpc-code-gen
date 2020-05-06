@@ -1,6 +1,6 @@
 {
   "name": "grpc-code-gen",
-  "version": "6.0.1",
+  "version": "6.0.9",
   "license": "MIT",
   "repository": "https://github.com/yunkeCN/grpc-code-gen.git",
   "bin": {
@@ -21,7 +21,7 @@
     "cross-spawn": "^6.0.5",
     "fs-extra": "^8.1.0",
     "load-git": "^1.5.2",
-    "load-proto": "^2.0.5",
+    "load-proto": "^2.0.6",
     "lodash": "^4.17.15"
   },
   "devDependencies": {
