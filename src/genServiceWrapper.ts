@@ -80,6 +80,7 @@ export default function serviceWrapper<Type>(Service: Type): Type {
           console.access(
             '-------grpc begin-------',
             'grpc invoke:', methodId,
+            'grpc path', origin.path,
             'request:', JSON.stringify({ url, method }),
             'metadata:', JSON.stringify(callmetadata._internal_repr || metadata),
             'request:', JSON.stringify(request),
@@ -110,6 +111,7 @@ export default function serviceWrapper<Type>(Service: Type): Type {
               console.access(
                 '-------grpc end-------',
                 'grpc invoke:', methodId,
+                'grpc path', origin.path,
                 'duration:', duration + 's',
                 'request:', JSON.stringify({ url, method }),
                 'metadata:', JSON.stringify(callmetadata._internal_repr || metadata),
@@ -119,8 +121,9 @@ export default function serviceWrapper<Type>(Service: Type): Type {
 
               if (err) {
                 console.error(
-                  '-------grpc-end--------',
+                  '-------grpc error--------',
                   'grpc invoke:', methodId,
+                  'grpc path', origin.path,
                   'duration:', duration + 's',
                   'request:', JSON.stringify({ url, method }),
                   'metadata:', JSON.stringify(callmetadata || metadata),
