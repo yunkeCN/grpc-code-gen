@@ -51,13 +51,32 @@ export async function gen(opt: Options): Promise<string> {
   }
 
   const firstUrl = gitUrls.splice(0, 1)
+
+  // 检测是否有依赖proto配置，先匹配出依赖项
+  const libs:any = (gitUrls as any).reduce((prev: (GitUrlsItem|string)[], next: GitUrlsItem | string, index: number)=>{
+    if (typeof (next) === 'object' && next.type === 'lib') {
+      gitUrls.splice(index,1)
+      return { ...prev, [next.url]: next }
+    }
+    return { ...prev}
+  },{})
+
+
   let allResult: Array<{ result: any, root: any, [propname: string]: any }> = []
   let alljson: { [propname: string]: any } = {}
 
   await Promise.all(gitUrls.map(async (url: GitUrlsItem | string) => {
+    // 检测是否有依赖
+    let libUrl:any
+    if (typeof (url) === 'object' && url.deps && url.deps.length) {
+      libUrl = url.deps.reduce((prev:string[], next:string)=>{
+        return libs[next] ? [...prev, libs[next]] : [...prev]
+      },[])
+    }
+
     const newUrl: string = typeof url === 'string' ? url : url.url
     const root = await loadProto({
-      gitUrls: [...firstUrl, url],
+      gitUrls: libUrl && libUrl.length  ? [...firstUrl, ...libUrl, url] : [...firstUrl, url],
       branch,
       accessToken,
       resolvePath,
