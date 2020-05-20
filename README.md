@@ -18,7 +18,17 @@ module.exports = {
       url: 'git@git.myscrm.cn:ykcommon/ykproto.git',
       branch: 'master',
     },
-    'git@git.myscrm.cn:2c/panther-statistics-proto.git',
+    // 服务依赖proto
+    {
+      url: 'git@git.myscrm.cn:ykcommon/common-proto.git',
+      branch: 'master',
+      type:'lib'
+    },
+    { 
+      url: 'git@git.myscrm.cn:2c/panther-statistics-proto.git',
+      // panther-statistics 服务proto依赖于 common-proto
+      deps:['git@git.myscrm.cn:ykcommon/common.git']
+    },
     'git@git.myscrm.cn:2c/panther-third-proto.git',
   ],
   branch: 'test',
@@ -114,6 +124,9 @@ base.gen({
  
 
 ### 版本说明
+- v6.1.0 版本
+gitUrls配置新增依赖项
+
 - v6.0.6 版本
 新增 access 日志链路
 
