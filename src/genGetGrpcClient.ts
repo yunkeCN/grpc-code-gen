@@ -44,7 +44,7 @@ if (serviceConfigFileExist) {
 }
 
 export default function getGrpcClient<S>(service: IService<S>): S {
-  const serverName = service.serverName
+  const serverName: string = service.serverName
 
   if (serverName) {
     const serviceConfig = getServiceConfig(serverName, grpcServiceConfigLocal);

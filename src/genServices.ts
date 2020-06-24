@@ -170,6 +170,7 @@ export default async function genServices(opt: {
       `import serviceWrapper, { MetadataMap } from '${getImportPath(servicePath, serviceWrapperPath)}';\n`,
       `export interface ${typeName} {`,
       `  $FILE_NAME: string;`,
+      `  serverName: string;`,
       `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};\n`,
       ...methodStrArr,
       `  restartServer?: Function;`,
