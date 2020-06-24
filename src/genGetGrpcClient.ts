@@ -12,6 +12,7 @@ import * as path from 'path';
 
 export interface IService<S> {
   $FILE_NAME: string;
+  serverName: string;
 
   new(address: string, credentials: ChannelCredentials, options?: object): S;
 }
