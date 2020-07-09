@@ -21,7 +21,7 @@
     "cross-spawn": "^6.0.5",
     "fs-extra": "^8.1.0",
     "load-git": "^1.5.2",
-    "load-proto": "2.1.2",
+    "load-proto": "^2.1.3",
     "lodash": "^4.17.15"
   },
   "devDependencies": {
