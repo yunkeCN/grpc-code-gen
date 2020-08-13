@@ -183,14 +183,21 @@ export default async function genServices(opt: {
       `export default ${service.name};`,
       `export let base${service.name[0]}${service.name.slice(1)} = getGrpcClientFactory();`,
       `function getGrpcClientFactory() { return getGrpcClient<${typeName}>(${service.name}) };`,
-      `export const ${service.name[0].toLowerCase()}${service.name.slice(1)} = <${typeName}>(new Object());`,
+      `export const ${service.name[0].toLowerCase()}${service.name.slice(1)}:any = <${typeName}>(new Object());`,
+      `export const ${service.name[0].toLowerCase()}${service.name.slice(1)}V2:any = <${typeName}>(new Object());`,
       `Object.entries(base${service.name[0]}${service.name.slice(1)}.constructor.prototype)
   .filter(([methodName]) => /^[A-Za-z0-9]+$/g.test(methodName)).forEach(item => {
-    (${service.name[0].toLowerCase()}${service.name.slice(1)} as any)[item[0]] = async function (...option: []) {
+    ${service.name[0].toLowerCase()}${service.name.slice(1)}[item[0]] = async function (...option: []) {
       try { return await (base${service.name[0]}${service.name.slice(1)} as any)[item[0]](...option) } catch (err) {
         restrtGrpcRules(base${service.name[0]}${service.name.slice(1)}, err); 
-        console.info(err);
         throw err;
+      }
+    }
+    ${service.name[0].toLowerCase()}${service.name.slice(1)}V2[item[0]] = async function (...option: []) {
+      try { return await (base${service.name[0]}${service.name.slice(1)} as any)[item[0]](...option) } catch (err) {
+        restrtGrpcRules(base${service.name[0]}${service.name.slice(1)}, err); 
+        const message = (err.details || err.message || err.error || '').toLowerCase();
+        return { error: err, error_details: message, response:{} }
       }
     }
   });`,
