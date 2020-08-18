@@ -171,6 +171,7 @@ export default async function genServices(opt: {
       `export interface ${typeName} {`,
       `  $FILE_NAME: string;`,
       `  serverName: string;`,
+      `  [propsname:string]: any;`,
       `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};\n`,
       ...methodStrArr,
       `  restartServer?: Function;`,
@@ -183,8 +184,8 @@ export default async function genServices(opt: {
       `export default ${service.name};`,
       `export let base${service.name[0]}${service.name.slice(1)} = getGrpcClientFactory();`,
       `function getGrpcClientFactory() { return getGrpcClient<${typeName}>(${service.name}) };`,
-      `export const ${service.name[0].toLowerCase()}${service.name.slice(1)}:any = <${typeName}>(new Object());`,
-      `export const ${service.name[0].toLowerCase()}${service.name.slice(1)}V2:any = <${typeName}>(new Object());`,
+      `export const ${service.name[0].toLowerCase()}${service.name.slice(1)} = <${typeName}>(new Object());`,
+      `export const ${service.name[0].toLowerCase()}${service.name.slice(1)}V2 = <${typeName}>(new Object());`,
       `Object.entries(base${service.name[0]}${service.name.slice(1)}.constructor.prototype)
   .filter(([methodName]) => /^[A-Za-z0-9]+$/g.test(methodName)).forEach(item => {
     ${service.name[0].toLowerCase()}${service.name.slice(1)}[item[0]] = async function (...option: []) {
