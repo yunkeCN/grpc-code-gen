@@ -171,7 +171,6 @@ export default async function genServices(opt: {
       `export interface ${typeName} {`,
       `  $FILE_NAME: string;`,
       `  serverName: string;`,
-      `  [propsname:string]: any;`,
       `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};\n`,
       ...methodStrArr,
       `  restartServer?: Function;`,
@@ -188,19 +187,19 @@ export default async function genServices(opt: {
       `export const ${service.name[0].toLowerCase()}${service.name.slice(1)}V2 = <${typeName}>(new Object());`,
       `Object.entries(base${service.name[0]}${service.name.slice(1)}.constructor.prototype)
   .filter(([methodName]) => /^[A-Za-z0-9]+$/g.test(methodName)).forEach(item => {
-    ${service.name[0].toLowerCase()}${service.name.slice(1)}[item[0]] = async function (...option: []) {
+    (${service.name[0].toLowerCase()}${service.name.slice(1)} as any)[item[0]] = async function (...option: []) {
       try { return await (base${service.name[0]}${service.name.slice(1)} as any)[item[0]](...option) } catch (err) {
         restrtGrpcRules(base${service.name[0]}${service.name.slice(1)}, err); 
         throw err;
       }
-    }
-    ${service.name[0].toLowerCase()}${service.name.slice(1)}V2[item[0]] = async function (...option: []) {
+    };
+    (${service.name[0].toLowerCase()}${service.name.slice(1)}V2 as any)[item[0]] = async function (...option: []) {
       try { return await (base${service.name[0]}${service.name.slice(1)} as any)[item[0]](...option) } catch (err) {
         restrtGrpcRules(base${service.name[0]}${service.name.slice(1)}, err); 
         const message = (err.details || err.message || err.error || '').toLowerCase();
         return { error: err, error_details: message, response:{} }
       }
-    }
+    };
   });`,
       `Service.prototype.restartServer = base${service.name[0]}${service.name.slice(1)}.restartServer = function () { base${service.name[0]}${service.name.slice(1)} = getGrpcClientFactory()};`,
       `Service.prototype.closeServer = base${service.name[0]}${service.name.slice(1)}.closeServer = function () { (this as any).close(); (base${service.name[0]}${service.name.slice(1)} as any) = null;}`,
