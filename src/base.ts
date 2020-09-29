@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import { IOption, loadProto } from 'load-proto';
+import { IOption, loadProto, IGitConfigWithUrl } from 'load-proto';
 import { Options as LoaderOptions } from 'load-proto/build/loader';
 import { get, set } from 'lodash';
 import * as path from 'path';
@@ -14,18 +14,15 @@ import { getAbsPath, getPackageName } from "./utils";
 
 const BASE_DIR = path.join(process.cwd(), 'code-gen');
 
+type GitConfig = IGitConfigWithUrl & { type: string; deps: string[] };
+
 export interface Options extends IOption {
   baseDir?: string;
   target?: 'javascript' | 'typescript';
   configFilePath?: string;
   grpcNpmName?: string;
   loaderOptions?: LoaderOptions;
-}
-
-interface GitUrlsItem {
-  url: string,
-  branch?: string,
-  [propname: string]: any;
+  gitUrls: Array<GitConfig | string>;
 }
 
 export async function gen(opt: Options): Promise<string> {
@@ -33,13 +30,13 @@ export async function gen(opt: Options): Promise<string> {
     baseDir = BASE_DIR,
     target = 'typescript',
     configFilePath,
-    gitUrls,
     branch,
     accessToken,
     resolvePath,
     grpcNpmName = 'grpc',
     loaderOptions,
   } = opt;
+  let { gitUrls } = opt;
 
   fs.removeSync(baseDir);
   console.info(`Clean dir: ${baseDir}`);
@@ -53,30 +50,35 @@ export async function gen(opt: Options): Promise<string> {
   const firstUrl = gitUrls.splice(0, 1)
 
   // 检测是否有依赖proto配置，先匹配出依赖项
-  const libs:any = (gitUrls as any).reduce((prev: (GitUrlsItem|string)[], next: GitUrlsItem | string, index: number)=>{
-    if (typeof (next) === 'object' && next.type === 'lib') {
-      gitUrls.splice(index,1)
-      return { ...prev, [next.url]: next }
+  const libMap: { [url: string]: GitConfig } = {}
+  gitUrls = gitUrls.filter((item) => {
+    if (typeof (item) === 'object' && item.type === "lib"){
+      libMap[item.url] = item;
+      return false;
     }
-    return { ...prev}
-  },{})
-
+    return true;
+  });
 
   let allResult: Array<{ result: any, root: any, [propname: string]: any }> = []
   let alljson: { [propname: string]: any } = {}
 
-  await Promise.all(gitUrls.map(async (url: GitUrlsItem | string) => {
-    // 检测是否有依赖
-    let libUrl:any
-    if (typeof (url) === 'object' && url.deps && url.deps.length) {
-      libUrl = url.deps.reduce((prev:string[], next:string)=>{
-        return libs[next] ? [...prev, libs[next]] : [...prev]
-      },[])
+  await Promise.all(gitUrls.map(async (gitConfig: GitConfig | string) => {
+    // 解析依赖库
+    let deps: Array<GitConfig | string> = [];
+    if (typeof (gitConfig) === 'object' && gitConfig.deps && gitConfig.deps.length) {
+      deps = gitConfig.deps.map(item=>{
+        const lib = libMap[item];
+        if (!lib) {
+          console.error(`${gitConfig.url} dep ${item} not exist`)
+          process.exit(-1);
+        }
+        return lib
+      });
     }
 
-    const newUrl: string = typeof url === 'string' ? url : url.url
+    const newUrl: string = typeof gitConfig === 'string' ? gitConfig : gitConfig.url
     const root = await loadProto({
-      gitUrls: libUrl && libUrl.length  ? [...firstUrl, ...libUrl, url] : [...firstUrl, url],
+      gitUrls: [...firstUrl, ...deps, gitConfig],
       branch,
       accessToken,
       resolvePath,
@@ -84,7 +86,7 @@ export async function gen(opt: Options): Promise<string> {
     root.resolveAll();
     const json: any = root.toJSON({ keepComments: true });
 
-    let space:string = '' 
+    let space:string = ''
     let service:string = ''
 
     if (newUrl.indexOf('https://') > -1){

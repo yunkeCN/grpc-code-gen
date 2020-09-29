@@ -1322,10 +1322,10 @@ load-json-file@^4.0.0:
     pify "^3.0.0"
     strip-bom "^3.0.0"
 
-load-proto@^2.0.6:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/load-proto/-/load-proto-2.1.3.tgz#290dd311629834fffaac0cafd67e35d681fe246c"
-  integrity sha512-zVy8esgNoE7ZnhnPxiBDOCxxaxXXMWr2ZgSJPFUBAkJt/GtIm4jZQ0ysGgmx/2NVtOs2EBeAnLZ6xqf1ekCPKw==
+load-proto@^2.1.4:
+  version "2.1.4"
+  resolved "https://registry.npm.taobao.org/load-proto/download/load-proto-2.1.4.tgz?cache=0&sync_timestamp=1601355866735&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fload-proto%2Fdownload%2Fload-proto-2.1.4.tgz#d000251a8c9b061d2dc4f0ad1710ecad51d6c868"
+  integrity sha1-0AAlGoybBh0txPCtFxDsrVHWyGg=
   dependencies:
     fs-extra "^7.0.0"
     glob "^7.1.3"
@@ -1352,15 +1352,10 @@ lodash@^4.13.1, lodash@^4.17.10:
   version "4.17.11"
   resolved "https://registry.npmjs.org/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
 
-lodash@^4.17.13:
+lodash@^4.17.13, lodash@^4.17.19:
   version "4.17.20"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
   integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
-
-lodash@^4.17.15:
-  version "4.17.15"
-  resolved "https://registry.npmjs.org/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
-  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
 
 long@^4.0.0:
   version "4.0.0"

@@ -21,8 +21,8 @@
     "cross-spawn": "^6.0.5",
     "fs-extra": "^8.1.0",
     "load-git": "^1.5.2",
-    "load-proto": "^2.0.6",
-    "lodash": "^4.17.15"
+    "load-proto": "^2.1.4",
+    "lodash": "^4.17.19"
   },
   "devDependencies": {
     "@grpc/grpc-js": "^0.5.0",
