@@ -69,6 +69,7 @@ export default async function genServices(opt: {
   } = opt;
 
   // 新增团队级的文件夹
+  const oldService = service_
   baseDir = space ? `${baseDir}/${space}/${service_}` : baseDir
   service_ = service_.replace(/-/g, '_')
 
@@ -169,27 +170,36 @@ export default async function genServices(opt: {
       `import serviceWrapper, { MetadataMap } from '${getImportPath(servicePath, serviceWrapperPath)}';\n`,
       `export interface ${typeName} {`,
       `  $FILE_NAME: string;`,
+      `  serverName: string;`,
       `  new (address: string, credentials: ChannelCredentials, options?: object): ${typeName};\n`,
       ...methodStrArr,
       `  restartServer?: Function;`,
       `  closeServer?: Function;`,
       `}`,
       `const Service: ${typeName} = get<any, string>(grpcObject, '${space}_${service_}.${service.fullName}');`,
+      `Service.serverName = '${oldService}';`,
       `Service.$FILE_NAME = '${service.filename && service.filename.replace(/\\/g, '/')}';`,
       `export const ${service.name}: ${typeName} = serviceWrapper<${typeName}>(Service);`,
       `export default ${service.name};`,
       `export let base${service.name[0]}${service.name.slice(1)} = getGrpcClientFactory();`,
       `function getGrpcClientFactory() { return getGrpcClient<${typeName}>(${service.name}) };`,
       `export const ${service.name[0].toLowerCase()}${service.name.slice(1)} = <${typeName}>(new Object());`,
+      `export const ${service.name[0].toLowerCase()}${service.name.slice(1)}V2 = <${typeName}>(new Object());`,
       `Object.entries(base${service.name[0]}${service.name.slice(1)}.constructor.prototype)
   .filter(([methodName]) => /^[A-Za-z0-9]+$/g.test(methodName)).forEach(item => {
     (${service.name[0].toLowerCase()}${service.name.slice(1)} as any)[item[0]] = async function (...option: []) {
       try { return await (base${service.name[0]}${service.name.slice(1)} as any)[item[0]](...option) } catch (err) {
         restrtGrpcRules(base${service.name[0]}${service.name.slice(1)}, err); 
-        console.info(err);
         throw err;
       }
-    }
+    };
+    (${service.name[0].toLowerCase()}${service.name.slice(1)}V2 as any)[item[0]] = async function (...option: []) {
+      try { return await (base${service.name[0]}${service.name.slice(1)} as any)[item[0]](...option) } catch (err) {
+        restrtGrpcRules(base${service.name[0]}${service.name.slice(1)}, err); 
+        const message = (err.details || err.message || err.error || '').toLowerCase();
+        return { error: err, error_details: message, response:{} }
+      }
+    };
   });`,
       `Service.prototype.restartServer = base${service.name[0]}${service.name.slice(1)}.restartServer = function () { base${service.name[0]}${service.name.slice(1)} = getGrpcClientFactory()};`,
       `Service.prototype.closeServer = base${service.name[0]}${service.name.slice(1)}.closeServer = function () { (this as any).close(); (base${service.name[0]}${service.name.slice(1)} as any) = null;}`,

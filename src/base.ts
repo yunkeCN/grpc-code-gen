@@ -35,6 +35,7 @@ export async function gen(opt: Options): Promise<string> {
     resolvePath,
     grpcNpmName = 'grpc',
     loaderOptions,
+    loadProtoPlugin
   } = opt;
   let { gitUrls } = opt;
 
@@ -82,18 +83,16 @@ export async function gen(opt: Options): Promise<string> {
       branch,
       accessToken,
       resolvePath,
+      loadProtoPlugin
     });
     root.resolveAll();
     const json: any = root.toJSON({ keepComments: true });
 
-    let space:string = ''
-    let service:string = ''
-
-    if (newUrl.indexOf('https://') > -1){
-      [service, space] = newUrl.replace('-proto.git', '').split('/').reverse()
-    } else {
-      [space, service] = (newUrl.match(/:.+-proto/) as any)[0].replace(/:|-proto/g, '').split('/')
-    }
+    let [service, space] = newUrl
+      .replace(/:/g, '/')
+      .replace(/(-proto\.git|\.git)/, '')
+      .split('/')
+      .reverse();
 
     allResult.push({
       result: inspectNamespace(root),

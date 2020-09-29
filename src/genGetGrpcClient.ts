@@ -12,6 +12,7 @@ import * as path from 'path';
 
 export interface IService<S> {
   $FILE_NAME: string;
+  serverName: string;
 
   new(address: string, credentials: ChannelCredentials, options?: object): S;
 }
@@ -44,11 +45,9 @@ if (serviceConfigFileExist) {
 }
 
 export default function getGrpcClient<S>(service: IService<S>): S {
-  const exec = /\\/([^/]+)-proto\\//.exec(service.$FILE_NAME);
+  const serverName: string = service.serverName
 
-  if (exec) {
-    const serverName = exec[1];
-
+  if (serverName) {
     const serviceConfig = getServiceConfig(serverName, grpcServiceConfigLocal);
 
     if (serviceConfig) {
