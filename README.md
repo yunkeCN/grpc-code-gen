@@ -31,7 +31,7 @@ module.exports = {
     },
     {
       url: 'git@git.myscrm.cn:2c/panther-third-proto.git',
-      serviceName: 'panther-third', // go 服务别名
+      host: 'panther-third', // go 服务别名
     }
   ],
   branch: 'test',
@@ -64,7 +64,7 @@ grpc-code-gen gen
 
 参数 | 类型 | 说明 | 默认值
 ---|---|---|---
-gitUrls | Array<string \| {url: string, branch?: string, accessToken?: string，srviceName?: string }> | 仓库地址数组 | `null`
+gitUrls | Array<string \| {url: string, branch?: string, accessToken?: host?: string }> | 仓库地址数组 | `null`
 branch |  string | 分支，如参数没有，会去读取环境变量参数`branch` | `null`
 accessToken | string | git access token | `null`
 baseDir? | string | 生成目录 | `null`

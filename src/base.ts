@@ -14,7 +14,7 @@ import { getAbsPath, getPackageName } from "./utils";
 
 const BASE_DIR = path.join(process.cwd(), 'code-gen');
 
-type GitConfig = IGitConfigWithUrl & { serviceName?: string; } & { type: string; deps: string[]; };
+type GitConfig = IGitConfigWithUrl & { host?: string; } & { type: string; deps: string[]; };
 
 export interface Options extends IOption {
   baseDir?: string;
@@ -78,7 +78,7 @@ export async function gen(opt: Options): Promise<string> {
     }
 
     const newUrl: string = typeof gitConfig === 'string' ? gitConfig : gitConfig.url
-    const serviceName: string = typeof gitConfig === 'object' ? (gitConfig.serviceName ||'' ) : ''
+    const host: string = typeof gitConfig === 'object' ? (gitConfig.host ||'' ) : ''
     const root = await loadProto({
       gitUrls: [...firstUrl, ...deps, gitConfig],
       branch,
@@ -100,7 +100,7 @@ export async function gen(opt: Options): Promise<string> {
       root,
       space,
       service,
-      serviceName
+      host
     })
     alljson[`${space}_${service.replace(/-/g, '_')}`] = json
   }))
@@ -147,7 +147,7 @@ export async function gen(opt: Options): Promise<string> {
 
   allResult.map(async (item: { result: any, root: any, [propname: string]: any }, index: number) => {
 
-    const { result, root, space, service, serviceName } = item
+    const { result, root, space, service, host } = item
     const { services, methods, messages, enums } = result;
 
     const namespace: TNamespace = {};
@@ -191,7 +191,7 @@ export async function gen(opt: Options): Promise<string> {
       loaderOptions,
       space,
       service,
-      serviceName
+      host
     });
 
   })
