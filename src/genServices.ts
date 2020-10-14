@@ -70,7 +70,6 @@ export default async function genServices(opt: {
   } = opt;
 
   // 新增团队级的文件夹
-  const oldService = service_
   baseDir = space ? `${baseDir}/${space}/${service_}` : baseDir
   service_ = service_.replace(/-/g, '_')
 
@@ -178,7 +177,7 @@ export default async function genServices(opt: {
       `  closeServer?: Function;`,
       `}`,
       `const Service: ${typeName} = get<any, string>(grpcObject, '${space}_${service_}.${service.fullName}');`,
-      `Service.serverName = '${host || oldService}';`,
+      `Service.serverName = '${host}';`,
       `Service.$FILE_NAME = '${service.filename && service.filename.replace(/\\/g, '/')}';`,
       `export const ${service.name}: ${typeName} = serviceWrapper<${typeName}>(Service);`,
       `export default ${service.name};`,

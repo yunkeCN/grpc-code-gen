@@ -78,7 +78,6 @@ export async function gen(opt: Options): Promise<string> {
     }
 
     const newUrl: string = typeof gitConfig === 'string' ? gitConfig : gitConfig.url
-    const host: string = typeof gitConfig === 'object' ? (gitConfig.host ||'' ) : ''
     const root = await loadProto({
       gitUrls: [...firstUrl, ...deps, gitConfig],
       branch,
@@ -94,6 +93,8 @@ export async function gen(opt: Options): Promise<string> {
       .replace(/(-proto\.git|\.git)/, '')
       .split('/')
       .reverse();
+
+    const host: string = typeof gitConfig === 'object' ? (gitConfig.host || service) : service
 
     allResult.push({
       result: inspectNamespace(root),
