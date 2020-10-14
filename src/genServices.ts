@@ -39,7 +39,6 @@ export default async function genServices(opt: {
   serviceWrapperPath: string;
   typesPath: string;
   grpcClientPath: string;
-
   services: TService[];
   methods: TMethod[];
   enums: TEnum[];
@@ -50,6 +49,7 @@ export default async function genServices(opt: {
   loaderOptions?: LoaderOptions;
   space: string;
   service: string;
+  serviceName?: string;
 }): Promise<void> {
   let {
     grpcNpmName,
@@ -65,7 +65,8 @@ export default async function genServices(opt: {
     root,
     loaderOptions,
     space,
-    service: service_
+    service: service_,
+    serviceName
   } = opt;
 
   // 新增团队级的文件夹
@@ -177,7 +178,7 @@ export default async function genServices(opt: {
       `  closeServer?: Function;`,
       `}`,
       `const Service: ${typeName} = get<any, string>(grpcObject, '${space}_${service_}.${service.fullName}');`,
-      `Service.serverName = '${oldService}';`,
+      `Service.serverName = '${serviceName || oldService}';`,
       `Service.$FILE_NAME = '${service.filename && service.filename.replace(/\\/g, '/')}';`,
       `export const ${service.name}: ${typeName} = serviceWrapper<${typeName}>(Service);`,
       `export default ${service.name};`,

@@ -14,7 +14,7 @@ import { getAbsPath, getPackageName } from "./utils";
 
 const BASE_DIR = path.join(process.cwd(), 'code-gen');
 
-type GitConfig = IGitConfigWithUrl & { type: string; deps: string[] };
+type GitConfig = IGitConfigWithUrl & { serviceName?: string; } & { type: string; deps: string[]; };
 
 export interface Options extends IOption {
   baseDir?: string;
@@ -67,7 +67,7 @@ export async function gen(opt: Options): Promise<string> {
     // 解析依赖库
     let deps: Array<GitConfig | string> = [];
     if (typeof (gitConfig) === 'object' && gitConfig.deps && gitConfig.deps.length) {
-      deps = gitConfig.deps.map(item=>{
+      deps = gitConfig.deps.map((item: string)=>{
         const lib = libMap[item];
         if (!lib) {
           console.error(`${gitConfig.url} dep ${item} not exist`)
@@ -78,6 +78,7 @@ export async function gen(opt: Options): Promise<string> {
     }
 
     const newUrl: string = typeof gitConfig === 'string' ? gitConfig : gitConfig.url
+    const serviceName: string = typeof gitConfig === 'object' ? (gitConfig.serviceName ||'' ) : ''
     const root = await loadProto({
       gitUrls: [...firstUrl, ...deps, gitConfig],
       branch,
@@ -98,7 +99,8 @@ export async function gen(opt: Options): Promise<string> {
       result: inspectNamespace(root),
       root,
       space,
-      service
+      service,
+      serviceName
     })
     alljson[`${space}_${service.replace(/-/g, '_')}`] = json
   }))
@@ -145,7 +147,7 @@ export async function gen(opt: Options): Promise<string> {
 
   allResult.map(async (item: { result: any, root: any, [propname: string]: any }, index: number) => {
 
-    const { result, root, space, service } = item
+    const { result, root, space, service, serviceName } = item
     const { services, methods, messages, enums } = result;
 
     const namespace: TNamespace = {};
@@ -188,7 +190,8 @@ export async function gen(opt: Options): Promise<string> {
       typesPath,
       loaderOptions,
       space,
-      service
+      service,
+      serviceName
     });
 
   })
