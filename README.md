@@ -29,7 +29,10 @@ module.exports = {
       // panther-statistics 服务proto依赖于 common-proto
       deps:['git@git.myscrm.cn:ykcommon/common.git']
     },
-    'git@git.myscrm.cn:2c/panther-third-proto.git',
+    {
+      url: 'git@git.myscrm.cn:2c/panther-third-proto.git',
+      host: 'panther-third', // go 服务别名
+    }
   ],
   branch: 'test',
   accessToken: '${token}',
@@ -61,7 +64,7 @@ grpc-code-gen gen
 
 参数 | 类型 | 说明 | 默认值
 ---|---|---|---
-gitUrls | Array<string \| {url: string, branch?: string, accessToken?: string}> | 仓库地址数组 | `null`
+gitUrls | Array<string \| {url: string, branch?: string, accessToken?: host?: string }> | 仓库地址数组 | `null`
 branch |  string | 分支，如参数没有，会去读取环境变量参数`branch` | `null`
 accessToken | string | git access token | `null`
 baseDir? | string | 生成目录 | `null`
@@ -124,6 +127,9 @@ base.gen({
  
 
 ### 版本说明
+-v6.1.13 版本
+gitUrls配置新增服务别名配置项
+
 - v6.1.0 版本
 gitUrls配置新增依赖项
 
