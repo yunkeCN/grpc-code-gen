@@ -75,6 +75,7 @@ loaderOptions? | [LoaderOptions](https://github.com/grpc/grpc-node/tree/master/p
 callOptions? | [callOptions](#callOptions) | 方法调用配置 | null
 logOptions? | [logOptions](#logOptions) | 日志配置 | null
 filterError? | (err: Error) => Error | 错误过滤 | (err) => err
+loadProtoPlugin? | (option: IGitConfigWithUrl) => Promise<ILoadResult> | proto加载插件 | unll
 
 #### callOptions
 
