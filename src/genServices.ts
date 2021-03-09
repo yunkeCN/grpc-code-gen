@@ -1,6 +1,6 @@
 import * as fs from "fs-extra";
 import { get, set } from 'lodash';
-import { Root } from 'protobufjs';
+import { Root } from '@yunke/protobufjs';
 import { Options as LoaderOptions } from 'load-proto/build/loader';
 import { TEnum, TMessage, TMethod, TService } from "./types";
 import {
