@@ -2003,10 +2003,10 @@ load-git@^1.5.2, load-git@^1.5.3:
     url "^0.11.0"
     uuid "^3.3.2"
 
-load-proto@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.npm.taobao.org/load-proto/download/load-proto-2.2.1.tgz#b1e8cf4327cee9f33bd46d09588d0a7ac03d3a03"
-  integrity sha1-sejPQyfO6fM71G0JWI0KesA9OgM=
+load-proto@2.2.2:
+  version "2.2.2"
+  resolved "https://registry.npm.taobao.org/load-proto/download/load-proto-2.2.2.tgz#c232804ab3afa273e0ef448ecddacf595c35f4f1"
+  integrity sha1-wjKASrOvonPg70SOzdrPWVw19PE=
   dependencies:
     "@yunke/protobufjs" "^1.0.6"
     fs-extra "^7.0.0"
@@ -3196,7 +3196,7 @@ typedarray-to-buffer@^3.1.5:
 
 typescript@^4.2.3:
   version "4.2.3"
-  resolved "https://registry.npm.taobao.org/typescript/download/typescript-4.2.3.tgz?cache=0&sync_timestamp=1615188548856&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Ftypescript%2Fdownload%2Ftypescript-4.2.3.tgz#39062d8019912d43726298f09493d598048c1ce3"
+  resolved "https://registry.npm.taobao.org/typescript/download/typescript-4.2.3.tgz#39062d8019912d43726298f09493d598048c1ce3"
   integrity sha1-OQYtgBmRLUNyYpjwlJPVmASMHOM=
 
 unbzip2-stream@^1.0.9:
