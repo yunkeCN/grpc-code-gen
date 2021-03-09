@@ -11,7 +11,7 @@ import {
   ReflectionObject,
   Service,
   Type,
-} from 'protobufjs';
+} from '@yunke/protobufjs';
 import { TEnum, TField, TMessage, TMethod, TService } from "./types";
 
 interface HasName {

@@ -1,4 +1,4 @@
-import { Root } from 'protobufjs';
+import { Root } from '@yunke/protobufjs';
 import { Options as LoaderOptions } from 'load-proto/build/loader';
 import { TEnum, TMessage, TNamespace } from "./types";
 import {

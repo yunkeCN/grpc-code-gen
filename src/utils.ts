@@ -1,5 +1,5 @@
 import * as path from "path";
-import { Root } from "protobufjs";
+import { Root } from "@yunke/protobufjs";
 import { TEnum, TMessage } from "./types";
 import { Options as LoaderOptions } from "load-proto/build/loader";
 
