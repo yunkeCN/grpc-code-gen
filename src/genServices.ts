@@ -154,6 +154,12 @@ export default async function genServices(opt: {
     request: ${requestType};
     metadata?: MetadataMap;
     options?: { timeout?: number; flags?: number; host?: string; };
+  }): Promise<{ response:${responseType}, metadata: Metadata }>;
+  ${method.comment ? `/** ${method.comment} */` : ''}
+  ${method.name}V3(option: {
+    request: ${requestType};
+    metadata?: MetadataMap;
+    options?: { timeout?: number; flags?: number; host?: string; };
   }): Promise<{ response:${responseType}, metadata: Metadata }>;`
       });
 

@@ -75,6 +75,7 @@ loaderOptions? | [LoaderOptions](https://github.com/grpc/grpc-node/tree/master/p
 callOptions? | [callOptions](#callOptions) | 方法调用配置 | null
 logOptions? | [logOptions](#logOptions) | 日志配置 | null
 filterError? | (err: Error) => Error | 错误过滤 | (err) => err
+loadProtoPlugin? | (option: IGitConfigWithUrl) => Promise<ILoadResult> | proto加载插件 | unll
 
 #### callOptions
 
@@ -127,7 +128,7 @@ base.gen({
  
 
 ### 版本说明
--v6.1.13 版本
+- v6.1.13 版本
 gitUrls配置新增服务别名配置项
 
 - v6.1.0 版本
