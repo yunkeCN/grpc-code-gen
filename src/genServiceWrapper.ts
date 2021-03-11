@@ -116,7 +116,7 @@ export default function serviceWrapper<Type>(Service: Type): Type {
                 'client request:', JSON.stringify({ url, method }),
                 'metadata:', JSON.stringify(callmetadata._internal_repr || metadata),
                 'bff request:', JSON.stringify(request),
-                'trace.id', headers['trace-id'] || traceId || metadata['trace-id'] || '',
+                'trace.id', headers['trace-id'] || metadata['trace-id'] || '',
               );
 
               if (err) {
@@ -128,7 +128,7 @@ export default function serviceWrapper<Type>(Service: Type): Type {
                   'client request:', JSON.stringify({ url, method }),
                   'metadata:', JSON.stringify(callmetadata._internal_repr || metadata),
                   'bff request:', JSON.stringify(request),
-                  'trace.id', headers['trace-id'] || traceId || metadata['trace-id'] || '',
+                  'trace.id', headers['trace-id'] || metadata['trace-id'] || '',
                   'err:', err,
                 );
               }
