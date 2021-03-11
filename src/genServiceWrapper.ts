@@ -81,9 +81,9 @@ export default function serviceWrapper<Type>(Service: Type): Type {
             '-------grpc begin-------',
             'grpc invoke:', methodId,
             'grpc path', origin.path,
-            'request:', JSON.stringify({ url, method }),
+            'client request:', JSON.stringify({ url, method }),
             'metadata:', JSON.stringify(callmetadata._internal_repr || metadata),
-            'request:', JSON.stringify(request),
+            'bff request:', JSON.stringify(request),
             'trace.id', headers['trace-id'] || traceId || metadata['trace-id'] || ''
           );
         }
@@ -113,10 +113,10 @@ export default function serviceWrapper<Type>(Service: Type): Type {
                 'grpc invoke:', methodId,
                 'grpc path', origin.path,
                 'duration:', duration + 's',
-                'request:', JSON.stringify({ url, method }),
+                'client request:', JSON.stringify({ url, method }),
                 'metadata:', JSON.stringify(callmetadata._internal_repr || metadata),
-                'request:', JSON.stringify(request),
-                'trace.id', headers['trace-id']
+                'bff request:', JSON.stringify(request),
+                'trace.id', headers['trace-id'] || traceId || metadata['trace-id'] || '',
               );
 
               if (err) {
@@ -125,10 +125,10 @@ export default function serviceWrapper<Type>(Service: Type): Type {
                   'grpc invoke:', methodId,
                   'grpc path', origin.path,
                   'duration:', duration + 's',
-                  'request:', JSON.stringify({ url, method }),
-                  'metadata:', JSON.stringify(callmetadata || metadata),
-                  'request:', JSON.stringify(request),
-                  'trace.id', headers['trace-id'],
+                  'client request:', JSON.stringify({ url, method }),
+                  'metadata:', JSON.stringify(callmetadata._internal_repr || metadata),
+                  'bff request:', JSON.stringify(request),
+                  'trace.id', headers['trace-id'] || traceId || metadata['trace-id'] || '',
                   'err:', err,
                 );
               }
@@ -148,16 +148,8 @@ export default function serviceWrapper<Type>(Service: Type): Type {
         doCall(this);
       };
 
-      const wrapper2 = function(this: any, request: any) {
-        function doCall(self: any) {
-          let res = (origin as any).apply(self, [request]);
-          return res
-        }
-        return doCall(this);
-      };
 
       (Service as any).prototype[key] = promisify(wrapper);
-      (Service as any).prototype[\`\$\{key\}V3\`] = wrapper2;
       (Service as any).prototype[\`\$\{key\}V2\`] = function(option: ReqOptions) {
         const { request, metadata = {}, options } = option;
         return new Promise((resolve, reject) => {
