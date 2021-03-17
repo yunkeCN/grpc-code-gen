@@ -38,10 +38,10 @@ let grpcServiceConfigLocal: { [serviceName: string]: { host: string; port: numbe
 const serviceConfigFileExist = fs.existsSync(grpcServiceConfigPath);
 if (serviceConfigFileExist) {
   grpcServiceConfigLocal = require(grpcServiceConfigPath);
-  console.info('---------------------------');
-  console.info('Use local service config: ');
-  console.info(JSON.stringify(grpcServiceConfigLocal, (key, value) => value, 2));
-  console.info('---------------------------');
+  // console.info('---------------------------');
+  // console.info('Use local service config: ');
+  // console.info(JSON.stringify(grpcServiceConfigLocal, (key, value) => value, 2));
+  // console.info('---------------------------');
 }
 
 export default function getGrpcClient<S>(service: IService<S>): S {
