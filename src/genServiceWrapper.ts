@@ -54,7 +54,7 @@ function needRetry(err: any): boolean {
 export default function serviceWrapper<Type>(Service: Type): Type {
   Object.keys((Service as any).prototype).forEach((key) => {
     if (!/^\\$/.test(key)) {
-      const origin = (Service as any).prototype[key];
+      const origin = (Service as any).prototype[key] || {};
       const methodId = origin.path ? origin.path.replace(/\\//g, '.').replace(/^\\./, '') : '';
       const wrapper = function(this: any, request: any, metadata: any, options: any, callback: any) {
         switch (arguments.length) {
